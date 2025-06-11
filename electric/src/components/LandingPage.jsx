@@ -3,10 +3,25 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { Zap, MapPin, Clock, Star, ArrowRight, Menu, X } from "lucide-react"
+import {
+  Zap,
+  MapPin,
+  Clock,
+  Star,
+  ArrowRight,
+  Menu,
+  X,
+  Mail,
+  Phone,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react"
 
 const LandingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [email, setEmail] = useState("")
 
   const features = [
     {
@@ -33,15 +48,37 @@ const LandingPage = () => {
     { number: "98%", label: "Customer Satisfaction" },
   ]
 
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault()
+    // Handle newsletter signup
+    console.log("Newsletter signup:", email)
+    setEmail("")
+  }
+
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Navigation */}
       <nav className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Zap className="w-8 h-8 text-green-400 mr-2" />
-              <span className="text-white font-bold text-xl">EV Recharge Platform</span>
+            <div className="flex items-center h-14">
+              <Zap className="w-11 h-11 text-green-400 mr-2" />
+              <motion.span
+                style={{ fontFamily: "'Monoton', sans-serif", fontStyle: "normal" }}
+                className="text-white text-3xl tracking-wide uppercase relative overflow-hidden"
+                animate={{
+                  x: [0, -2, 2, -1, 1, 0],
+                  skewX: [0, 5, -5, 3, -3, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  ease: "easeInOut",
+                }}
+              >
+                Zap<span className="text-green-400">Zone</span>
+              </motion.span>
             </div>
 
             {/* Desktop Navigation */}
@@ -308,25 +345,25 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-[linear-gradient(to_right,_#0a1d40,_#3b82f6,_#0a1d40)]">
+      {/* CTA Section - Toned Down */}
+      <section className="py-20 bg-gray-800 border-t border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Ready to Start Your EV Journey?</h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
               Join thousands of drivers who have already made the switch to sustainable transportation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/register"
-                className="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
+                className="bg-green-400 text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-300 transition-colors inline-flex items-center justify-center"
               >
                 Get Started Today
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
               <Link
                 to="/browse"
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-colors"
+                className="border border-gray-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-700 transition-colors"
               >
                 Browse Stations
               </Link>
@@ -334,6 +371,130 @@ const LandingPage = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 border-t border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="lg:col-span-1">
+              <div className="flex items-center mb-4">
+                <Zap className="w-8 h-8 text-green-400 mr-2" />
+                <span className="text-white font-bold text-xl">EV Recharge</span>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Leading the future of electric vehicle charging with smart, reliable, and accessible charging solutions.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/browse" className="text-gray-400 hover:text-white transition-colors">
+                    Find Stations
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/register" className="text-gray-400 hover:text-white transition-colors">
+                    Sign Up
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="text-gray-400 hover:text-white transition-colors">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    How It Works
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Cookie Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact & Newsletter */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Stay Connected</h3>
+              <div className="space-y-4">
+                <div className="flex items-center text-gray-400">
+                  <Mail className="w-4 h-4 mr-2" />
+                  <span className="text-sm">support@evrecharge.com</span>
+                </div>
+                <div className="flex items-center text-gray-400">
+                  <Phone className="w-4 h-4 mr-2" />
+                  <span className="text-sm">+1 (555) 123-4567</span>
+                </div>
+                <form onSubmit={handleNewsletterSubmit} className="mt-4">
+                  <div className="flex">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-400 text-gray-900 rounded-r-lg hover:bg-green-300 transition-colors"
+                    >
+                      Subscribe
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p className="text-gray-400">© {new Date().getFullYear()} EV Recharge Platform. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

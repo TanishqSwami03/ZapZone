@@ -42,15 +42,15 @@ const AdminLayout = ({ children }) => {
     return location.pathname === href
   }
 
-  const getPageTitle = () => {
-    const path = location.pathname
-    if (path === "/admin" || path === "/admin/") return "Dashboard Overview"
-    if (path === "/admin/stations") return "Station Moderation"
-    if (path === "/admin/users") return "User Management"
-    if (path === "/admin/companies") return "Company Management"
-    if (path === "/admin/reports") return "Analytics & Reports"
-    return "Admin Dashboard"
-  }
+  // const getPageTitle = () => {
+  //   const path = location.pathname
+  //   if (path === "/admin" || path === "/admin/") return "Dashboard Overview"
+  //   if (path === "/admin/stations") return "Station Moderation"
+  //   if (path === "/admin/users") return "User Management"
+  //   if (path === "/admin/companies") return "Company Management"
+  //   if (path === "/admin/reports") return "Analytics & Reports"
+  //   return "Admin Dashboard"
+  // }
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
@@ -371,9 +371,9 @@ const AdminLayout = ({ children }) => {
           </button>
 
           {/* Page Title - visible on desktop */}
-          <div className="hidden lg:block">
+          {/* <div className="hidden lg:block">
             <h1 className="text-lg font-semibold text-white">{getPageTitle()}</h1>
-          </div>
+          </div> */}
 
           {/* User info - always on the right */}
           <div className="flex items-center space-x-4">

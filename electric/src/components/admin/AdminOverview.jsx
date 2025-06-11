@@ -12,118 +12,65 @@ import {
   DollarSign,
   MapPin,
   Shield,
-  Activity,
+  Building2Icon,
+  Zap,
 } from "lucide-react"
 import { useUser } from "../../context/UserContext"
+import { useMemo } from "react"
 
 const AdminOverview = () => {
   const navigate = useNavigate()
-  const { stations = [], users = [], bookings = [] } = useUser() || {}
+  const { stations, users, bookings } = useUser()
 
-  // Calculate stats
-  const totalStations = stations.length
-  const activeStations = stations.filter((s) => s.status === "active").length
-  const pendingStations = stations.filter((s) => s.status === "pending").length
   const totalUsers = users.filter((u) => u.type === "user").length
   const totalCompanies = users.filter((u) => u.type === "company").length
-  const totalBookings = bookings.length
-  const activeBookings = bookings.filter((b) => b.status === "charging").length
-  const totalRevenue = bookings.reduce((sum, booking) => sum + booking.cost, 0)
+  const totalStations = stations.length
+  const totalRevenue = bookings.reduce((sum, b) => sum + (b.cost || 0), 0)
 
   const quickStats = [
-    {
-      title: "Total Stations",
-      value: totalStations,
-      subtitle: `${activeStations} Active`,
-      icon: MapPin,
-      color: "blue",
-    },
-    {
-      title: "Active Users",
-      value: totalUsers,
-      subtitle: `${totalUsers + totalCompanies} Total`,
-      icon: Users,
-      color: "green",
-    },
-    {
-      title: "Total Revenue",
-      value: `$${totalRevenue.toFixed(0)}`,
-      subtitle: `${totalBookings} Bookings`,
-      icon: DollarSign,
-      color: "purple",
-    },
-    {
-      title: "Active Sessions",
-      value: activeBookings,
-      subtitle: `${pendingStations} Pending`,
-      icon: Activity,
-      color: "yellow",
-    },
+    { title: "Total Stations", value: totalStations, icon: MapPin, color: "blue" },
+    { title: "Total Companies", value: totalCompanies, icon: Building2Icon, color: "yellow" },
+    { title: "Total Users", value: totalUsers, icon: Users, color: "green" },
+    { title: "Total Revenue", value: `₹ ${totalRevenue.toFixed(0)}`, icon: DollarSign, color: "purple" },
   ]
 
-  const recentActivity = [
-    {
-      type: "station",
-      message: "New station pending approval",
-      time: "2 minutes ago",
-      icon: Clock,
-      color: "yellow",
-    },
-    {
-      type: "user",
-      message: "New user registered",
-      time: "5 minutes ago",
-      icon: Users,
-      color: "green",
-    },
-    {
-      type: "booking",
-      message: "Charging session completed",
-      time: "8 minutes ago",
-      icon: CheckCircle,
-      color: "blue",
-    },
-    {
-      type: "alert",
-      message: "Station reported offline",
-      time: "12 minutes ago",
-      icon: AlertCircle,
-      color: "red",
-    },
-    {
-      type: "user",
-      message: "Company registration approved",
-      time: "15 minutes ago",
-      icon: Building2,
-      color: "purple",
-    },
-  ]
+  // 🔥 Real Recent Activity (Top 5 recent entities)
+  const recentActivity = useMemo(() => {
+    const combined = [
+      ...users.map((u) => ({
+        createdAt: u.createdAt?.seconds || 0,
+        message: u.type === "company" ? "New company registered" : "New user joined",
+        icon: u.type === "company" ? Building2 : Users,
+        color: u.type === "company" ? "purple" : "green",
+      })),
+      ...stations.map((s) => ({
+        createdAt: s.createdAt?.seconds || 0,
+        message: `Station "${s.name}" registered`,
+        icon: MapPin,
+        color: "blue",
+      })),
+      ...bookings.map((b) => ({
+        createdAt: b.createdAt?.seconds || 0,
+        message: "Charging session completed",
+        icon: CheckCircle,
+        color: "yellow",
+      })),
+    ]
+
+    return combined
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 5)
+      .map((entry) => ({
+        ...entry,
+        time: timeAgo(entry.createdAt),
+      }))
+  }, [users, stations, bookings])
 
   const quickActions = [
-    {
-      title: "Review Stations",
-      icon: Building2,
-      color: "blue",
-      path: "/admin/stations",
-    },
-    {
-      title: "Manage Users",
-      icon: Users,
-      color: "green",
-      path: "/admin/users",
-    },
-    {
-      title: "View Companies",
-      icon: Building2,
-      color: "purple",
-      path: "/admin/companies",
-    },
-    {
-      title: "View Reports",
-      icon: BarChart3,
-      color: "yellow",
-      path: "/admin/reports",
-    },
+    { title: "Review Stations", icon: Building2, color: "blue", path: "/admin/stations" },
+    { title: "Manage Users", icon: Users, color: "green", path: "/admin/users" },
+    { title: "View Companies", icon: Building2, color: "purple", path: "/admin/companies" },
+    { title: "View Reports", icon: BarChart3, color: "yellow", path: "/admin/reports" },
   ]
 
   const getColorClasses = (color) => {
@@ -157,6 +104,14 @@ const AdminOverview = () => {
       red: "text-red-400",
     }
     return colors[color] || colors.blue
+  }
+
+  const timeAgo = (seconds) => {
+    const diff = Math.floor(Date.now() / 1000) - seconds
+    if (diff < 60) return `${diff} sec ago`
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`
+    return `${Math.floor(diff / 86400)} day ago`
   }
 
   return (
@@ -195,8 +150,7 @@ const AdminOverview = () => {
                   <stat.icon className={`w-6 h-6 ${getIconColor(stat.color)}`} />
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-white">{stat.title}</p>
-                  <p className="text-sm text-gray-400">{stat.subtitle}</p>
+                  <p className={`text-lg font-semibold ${getIconColor(stat.color)}`}>{stat.title}</p>
                 </div>
               </div>
               <div>
@@ -208,7 +162,7 @@ const AdminOverview = () => {
       </div>
 
       {/* Two Column Layout for Quick Actions and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 pb-20">
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -233,7 +187,7 @@ const AdminOverview = () => {
           </div>
         </motion.div>
 
-        {/* Recent Activity */}
+        {/* Real Recent Activity */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -241,25 +195,27 @@ const AdminOverview = () => {
         >
           <h3 className="text-lg font-semibold text-white mb-6">Recent Activity</h3>
           <div className="space-y-4 max-h-80 overflow-y-auto">
-            {recentActivity.map((activity, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors"
-              >
-                <div
-                  className={`w-10 h-10 ${getIconBgColor(activity.color)} rounded-lg flex items-center justify-center flex-shrink-0`}
+            {recentActivity.length === 0 ? (
+              <p className="text-gray-400 text-sm">No recent activity.</p>
+            ) : (
+              recentActivity.map((activity, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors"
                 >
-                  <activity.icon className={`w-5 h-5 ${getIconColor(activity.color)}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{activity.message}</p>
-                  <p className="text-gray-400 text-xs">{activity.time}</p>
-                </div>
-              </motion.div>
-            ))}
+                  <div className={`w-10 h-10 ${getIconBgColor(activity.color)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <activity.icon className={`w-5 h-5 ${getIconColor(activity.color)}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{activity.message}</p>
+                    <p className="text-gray-400 text-xs">{activity.time}</p>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>

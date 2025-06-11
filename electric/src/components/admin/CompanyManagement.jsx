@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Building2, Search, MoreHorizontal, Ban, CheckCircle, Mail, Phone, MapPin, Calendar } from "lucide-react"
 import ConfirmModal from "../modals/ConfirmModal"
 import CompanyActionsModal from "../modals/CompanyActionsModal"
+import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore"
+import { db } from "../../firebase/firebaseConfig"
 
 const CompanyManagement = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -14,51 +16,20 @@ const CompanyManagement = () => {
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(null)
 
+  const [companies, setCompanies] = useState([])
+
   // Mock company data
-  const companies = [
-    {
-      id: 1,
-      name: "EV Solutions Inc.",
-      email: "contact@evsolutions.com",
-      phone: "+1 (555) 987-6543",
-      address: "123 Business Ave, Tech District",
-      status: "active",
-      joinDate: "2023-12-01",
-      lastActive: "2024-01-19",
-      stations: 3,
-      totalEarnings: 5420.0,
-      contactPerson: "John Smith",
-      businessLicense: "BL-2023-001",
-    },
-    {
-      id: 2,
-      name: "PowerCharge Corp.",
-      email: "info@powercharge.com",
-      phone: "+1 (555) 321-0987",
-      address: "456 Energy Blvd, Power District",
-      status: "pending",
-      joinDate: "2024-01-18",
-      lastActive: "2024-01-20",
-      stations: 0,
-      totalEarnings: 0,
-      contactPerson: "Sarah Johnson",
-      businessLicense: "BL-2024-002",
-    },
-    {
-      id: 3,
-      name: "GreenEnergy Ltd.",
-      email: "hello@greenenergy.com",
-      phone: "+1 (555) 654-3210",
-      address: "789 Eco Street, Green Valley",
-      status: "suspended",
-      joinDate: "2023-11-15",
-      lastActive: "2024-01-10",
-      stations: 2,
-      totalEarnings: 1250.0,
-      contactPerson: "Mike Davis",
-      businessLicense: "BL-2023-003",
-    },
-  ]
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "companies"), (snapshot) => {
+      const companyData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setCompanies(companyData)
+    })
+
+    return () => unsub()
+  }, [])
 
   const statusOptions = [
     { value: "", label: "All Statuses" },
@@ -132,16 +103,18 @@ const CompanyManagement = () => {
     console.log("Delete company:", selectedCompany)
   }
 
-  const confirmSuspend = () => {
-    // Update company status logic here
-    console.log("Suspending company:", selectedCompany)
+  const confirmSuspend = async () => {
+    await updateDoc(doc(db, "companies", selectedCompany.id), {
+      status: "suspended",
+    })
     setShowSuspendModal(false)
     setSelectedCompany(null)
   }
 
-  const confirmActivate = () => {
-    // Update company status logic here
-    console.log("Activating company:", selectedCompany)
+  const confirmActivate = async () => {
+    await updateDoc(doc(db, "companies", selectedCompany.id), {
+      status: "active",
+    })
     setShowActivateModal(false)
     setSelectedCompany(null)
   }
@@ -302,35 +275,40 @@ const CompanyManagement = () => {
                     <p className="text-xs text-gray-400 mb-1">Phone</p>
                     <div className="flex items-center text-sm">
                       <Phone className="w-3 h-3 mr-1 text-gray-400" />
-                      <span className="text-white">{company.phone}</span>
+                      <span className="text-white ml-1">{company.phone}</span>
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Join Date</p>
-                    <p className="text-white font-medium">{company.joinDate}</p>
+                    <p className="text-white font-medium">{company.joinDate.toDate().toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Last Active</p>
-                    <p className="text-white font-medium">{company.lastActive}</p>
+                    <p className="text-white font-medium">{company.lastActive.toDate().toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    })}</p>
                   </div>
                 </div>
 
                 {/* Address, Stations, Earnings */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Address</p>
-                    <div className="flex items-center text-sm">
-                      <MapPin className="w-3 h-3 mr-1 text-gray-400" />
-                      <span className="text-white">{company.address}</span>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Stations</p>
-                    <p className="text-white font-medium">{company.stations}</p>
+                    <p className="text-white font-medium">{company.stationCount}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Total Earnings</p>
-                    <p className="text-green-400 font-medium">${company.totalEarnings.toFixed(2)}</p>
+                    <p className="text-green-400 font-medium">₹ {company.totalRevenue}</p>
                   </div>
                 </div>
               </div>

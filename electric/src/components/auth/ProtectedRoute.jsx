@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import Lottie from "react-lottie-player";
-import spinnerJson from "../assets/spinner.json";
+import spinnerJson from "../../assets/spinner.json";
 import { useUser } from "../../context/UserContext";
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
