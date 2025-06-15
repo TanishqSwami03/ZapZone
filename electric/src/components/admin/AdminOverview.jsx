@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useNavigate } from "react-router-dom"
+import { useNavigate} from "react-router-dom"
 import {
   Building2,
   Users,
@@ -15,15 +15,44 @@ import {
   Building2Icon,
   Zap,
 } from "lucide-react"
-import { useUser } from "../../context/UserContext"
-import { useMemo } from "react"
+import { useMemo, useEffect, useState } from "react"
+import { collection, onSnapshot } from "firebase/firestore"
+import { db } from "../../firebase/firebaseConfig"
 
 const AdminOverview = () => {
   const navigate = useNavigate()
-  const { stations, users, bookings } = useUser()
+  const [users, setUsers] = useState([])
+  const [stations, setStations] = useState([])
+  const [bookings, setBookings] = useState([])
+  const [companies, setCompanies] = useState([])
 
-  const totalUsers = users.filter((u) => u.type === "user").length
-  const totalCompanies = users.filter((u) => u.type === "company").length
+  useEffect(() => {
+    const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    const unsubStations = onSnapshot(collection(db, "stations"), (snapshot) => {
+      setStations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    const unsubBookings = onSnapshot(collection(db, "bookings"), (snapshot) => {
+      setBookings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    const unsubCompanies = onSnapshot(collection(db, "companies"), (snapshot) => {
+      setCompanies(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    return () => {
+      unsubUsers()
+      unsubStations()
+      unsubBookings()
+      unsubCompanies()
+    }
+  }, [])
+
+  const totalUsers = users.length
+  const totalCompanies = companies.length
   const totalStations = stations.length
   const totalRevenue = bookings.reduce((sum, b) => sum + (b.cost || 0), 0)
 
@@ -62,7 +91,7 @@ const AdminOverview = () => {
       .slice(0, 5)
       .map((entry) => ({
         ...entry,
-        time: timeAgo(entry.createdAt),
+        // time: timeAgo(entry.createdAt),
       }))
   }, [users, stations, bookings])
 

@@ -3,9 +3,12 @@ import UserDashboard from "./components/dashboards/UserDashboard"
 import CompanyDashboard from "./components/dashboards/CompanyDashboard"
 import AdminDashboard from "./components/dashboards/AdminDashboard"
 import LandingPage from "./components/LandingPage"
-import LoginPage from "./components/auth/LoginPage"
-import RegisterPage from "./components/auth/RegisterPage"
-import ProtectedRoute from "./components/auth/ProtectedRoute"
+import LoginTypeSelection from "./components/auth/LoginTypeSelection"
+import RegisterTypeSelection from "./components/auth/RegisterTypeSelection"
+import UserLogin from "./components/auth/UserLogin"
+import CompanyLogin from "./components/auth/CompanyLogin"
+import UserRegister from "./components/auth/UserRegister"
+import CompanyRegister from "./components/auth/CompanyRegister"
 import { UserProvider } from "./context/UserContext"
 
 function App() {
@@ -15,13 +18,17 @@ function App() {
         <div className="min-h-screen bg-gray-900">
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginTypeSelection />} />
+            <Route path="/login/user" element={<UserLogin />} />
+            <Route path="/login/company" element={<CompanyLogin />} />
+            <Route path="/register" element={<RegisterTypeSelection />} />
+            <Route path="/register/user" element={<UserRegister />} />
+            <Route path="/register/company" element={<CompanyRegister />} />
             <Route
               path="/user/*"
               element={
                 // <ProtectedRoute allowedRoles={["user"]}>
-                  <UserDashboard />
+                <UserDashboard />
                 // </ProtectedRoute>
               }
             />
@@ -29,7 +36,7 @@ function App() {
               path="/company/*"
               element={
                 // <ProtectedRoute allowedRoles={["company"]}>
-                  <CompanyDashboard />
+                <CompanyDashboard />
                 // </ProtectedRoute>
               }
             />
@@ -37,7 +44,7 @@ function App() {
               path="/admin/*"
               element={
                 // <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminDashboard />
+                <AdminDashboard />
                 // </ProtectedRoute>
               }
             />

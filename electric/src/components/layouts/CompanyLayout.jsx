@@ -1,18 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Building2, Calendar, DollarSign, Menu, X, Zap, LogOut } from "lucide-react"
 import { useUser } from "../../context/UserContext"
-import ConfirmModal from "../modals/ConfirmModal"
+import { signOut, onAuthStateChanged } from "firebase/auth"
+import { auth, db } from "../../firebase/firebaseConfig"
+import { doc, getDoc, collection, query, where, getDocs, onSnapshot } from "firebase/firestore"
 
 const CompanyLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { logout, currentUser } = useUser()
+  const [userData, setUserData] = useState(null)
 
   const navigation = [
     { name: "Manage Stations", href: "/company/stations", icon: Building2 },
@@ -20,15 +23,50 @@ const CompanyLayout = ({ children }) => {
     { name: "Earnings", href: "/company/earnings", icon: DollarSign },
   ]
 
-  const handleLogout = () => {
-    logout()
-    navigate("/")
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      console.log("User Logged Out !!")
+      navigate("/")
+    } catch (err) {
+      console.error("Logout failed", err)
+    }
   }
 
-  const confirmLogout = () => {
-    setShowLogoutConfirm(false)
-    handleLogout()
-  }
+  // const confirmLogout = () => {
+  //   setShowLogoutConfirm(false)
+  //   handleLogout()
+  // }
+
+  useEffect(() => {
+    let unsubscribeUser = null
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.log("User not logged in")
+        return
+      }
+
+      const q = query(collection(db, "companies"), where("uid", "==", user.uid))
+
+      unsubscribeUser = onSnapshot(q, (querySnapshot) => {
+        if (!querySnapshot.empty) {
+          const userDocData = querySnapshot.docs[0].data()
+          console.log("🔄 Realtime User data:", userDocData)
+          setUserData(userDocData)
+        } else {
+          console.warn("⚠️ No matching user found in Firestore")
+        }
+      }, (err) => {
+        console.error("❌ Firestore listener error:", err)
+      })
+    })
+
+    return () => {
+      if (unsubscribeUser) unsubscribeUser()
+      unsubscribeAuth()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
@@ -91,7 +129,7 @@ const CompanyLayout = ({ children }) => {
 
           <div className="p-4 border-t border-gray-700">
             <button
-              onClick={() => setShowLogoutConfirm(true)}
+              onClick={() => setShowLogoutModal(true)}
               className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
             >
               <LogOut className="w-5 h-5 mr-3" />
@@ -131,7 +169,7 @@ const CompanyLayout = ({ children }) => {
                   Zap<span className="text-blue-400">Zone</span>
                 </motion.span>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setShowLogoutModal(true)} className="text-gray-400 hover:text-white">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -190,7 +228,7 @@ const CompanyLayout = ({ children }) => {
               <Building2 className="w-4 h-4 text-gray-900" />
             </div>
             <div className="text-white text-left">
-              <span className="ml-1 text-sm text-gray-400">EV Solutions Inc.</span>
+              <span className="ml-1 text-sm text-gray-400">{userData?.name || "Loading..."}</span>
               <span className="ml-1 font-medium block">Company Dashboard</span>
             </div>
           </div>
@@ -201,15 +239,28 @@ const CompanyLayout = ({ children }) => {
       </div>
 
       {/* Logout Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={confirmLogout}
-        title="Confirm Logout"
-        message="Are you sure you want to logout? You will need to sign in again to access your account."
-        confirmText="Logout"
-        confirmColor="red"
-      />
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 backdrop-blur-lg bg-opacity-50 flex items-center justify-center">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700">
+            <h2 className="text-white text-lg font-semibold mb-4">Confirm Logout</h2>
+            <p className="text-gray-300 mb-6">Are you sure you want to logout?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  
     </div>
   )
 }

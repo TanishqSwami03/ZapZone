@@ -2,28 +2,44 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, CreditCard, Wallet, DollarSign } from "lucide-react"
+import { X, CreditCard, Wallet, DollarSign, IndianRupee } from "lucide-react"
+import { doc, updateDoc, increment, getDoc } from "firebase/firestore"
+import { db, auth } from "../../firebase/firebaseConfig"
 
 const AddFundsModal = ({ isOpen, onClose }) => {
   const [amount, setAmount] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState("card")
+  // const [paymentMethod, setPaymentMethod] = useState("card")
   const [isLoading, setIsLoading] = useState(false)
 
-  const quickAmounts = [25, 50, 100, 200]
+  const quickAmounts = [200, 500, 800, 1000]
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!amount || Number.parseFloat(amount) <= 0) return
+    const numAmount = Number.parseFloat(amount)
+    if (!numAmount || numAmount <= 0) return
 
     setIsLoading(true)
+
     try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      // Here you would integrate with actual payment processor
+      const user = auth.currentUser
+      if (!user) throw new Error("User not logged in")
+
+      // Get user doc
+      const userRef = doc(db, "users", user.uid)
+      const userSnap = await getDoc(userRef)
+
+      if (!userSnap.exists()) throw new Error("User not found in Firestore")
+
+      // Increment wallet balance
+      await updateDoc(userRef, {
+        wallet: increment(numAmount),
+      })
+
       onClose()
       setAmount("")
     } catch (error) {
-      console.error("Payment failed:", error)
+      console.error("Failed to add funds:", error)
+      alert("Failed to add funds. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -74,7 +90,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                           : "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
                       }`}
                     >
-                      ${value}
+                      ₹ {value}
                     </motion.button>
                   ))}
                 </div>
@@ -84,7 +100,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
               <div>
                 <label className="block text-white font-medium mb-2">Custom Amount</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="number"
                     value={amount}
@@ -131,7 +147,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
                   />
                 ) : (
-                  `Add $${amount || "0.00"} to Wallet`
+                  `Add ₹ ${amount || "0.00"} to Wallet`
                 )}
               </motion.button>
             </form>

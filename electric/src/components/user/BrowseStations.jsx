@@ -213,14 +213,14 @@ const BrowseStations = () => {
             {/* Charger Types */}
             <div className="mb-4">
               <div className="flex flex-wrap gap-2">
-                {station.chargerTypes.map((type) => (
+                {/* {station.chargerTypes.map((type) => (
                   <span
                     key={type}
                     className="px-3 py-1 bg-green-400/10 text-green-400 text-xs rounded-full border border-green-400/20"
                   >
                     {type}
                   </span>
-                ))}
+                ))} */}
               </div>
             </div>
 
@@ -228,23 +228,23 @@ const BrowseStations = () => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <div className="text-xs text-gray-400 mb-1">Availability</div>
-                {Object.entries(station.availability).map(([type, count]) => (
+                {/* {Object.entries(station.availability).map(([type, count]) => (
                   <div key={type} className="flex items-center text-sm">
                     <Zap className="w-3 h-3 mr-1 text-green-400" />
                     <span className="text-white">
                       {count} {type}
                     </span>
                   </div>
-                ))}
+                ))} */}
               </div>
               <div>
                 <div className="text-xs text-gray-400 mb-1">Pricing</div>
-                {Object.entries(station.pricePerMinute).map(([type, price]) => (
+                {/* {Object.entries(station.pricePerMinute).map(([type, price]) => (
                   <div key={type} className="flex items-center text-sm">
                     <DollarSign className="w-3 h-3 mr-1 text-blue-400" />
                     <span className="text-white">${price}/min</span>
                   </div>
-                ))}
+                ))} */}
               </div>
             </div>
 
@@ -252,7 +252,7 @@ const BrowseStations = () => {
             <div className="mb-6">
               <div className="text-xs text-gray-400 mb-2">Amenities</div>
               <div className="flex flex-wrap gap-2">
-                {station.amenities.map((amenity) => {
+                {/* {station.amenities.map((amenity) => {
                   const IconComponent = getAmenityIcon(amenity)
                   return (
                     <div
@@ -263,7 +263,7 @@ const BrowseStations = () => {
                       {amenity}
                     </div>
                   )
-                })}
+                })} */}
               </div>
             </div>
 

@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Users, Search, MoreHorizontal, Ban, CheckCircle, Mail, Phone } from "lucide-react"
+import { Users, Search, MoreHorizontal, Ban, CheckCircle, Mail, Phone, User } from "lucide-react"
 import ConfirmModal from "../modals/ConfirmModal"
 import UserActionsModal from "../modals/UserActionsModal"
+import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore"
+import { db } from "../../firebase/firebaseConfig"
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -15,53 +17,19 @@ const UserManagement = () => {
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
 
-  // Mock user data (only individual users, no companies)
-  const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 (555) 123-4567",
-      status: "active",
-      joinDate: "2024-01-15",
-      lastActive: "2024-01-20",
-      bookings: 12,
-      totalSpent: 245.5,
-    },
-    {
-      id: 3,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "+1 (555) 456-7890",
-      status: "suspended",
-      joinDate: "2024-01-10",
-      lastActive: "2024-01-18",
-      bookings: 5,
-      totalSpent: 89.25,
-    },
-    {
-      id: 6,
-      name: "Mike Johnson",
-      email: "mike@example.com",
-      phone: "+1 (555) 789-0123",
-      status: "active",
-      joinDate: "2024-01-12",
-      lastActive: "2024-01-19",
-      bookings: 8,
-      totalSpent: 156.75,
-    },
-    {
-      id: 7,
-      name: "Sarah Wilson",
-      email: "sarah@example.com",
-      phone: "+1 (555) 234-5678",
-      status: "active",
-      joinDate: "2024-01-08",
-      lastActive: "2024-01-20",
-      bookings: 15,
-      totalSpent: 320.0,
-    },
-  ]
+  const [users, setUsers] = useState([])
+  
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "users"), (snapshot) => {
+      const userData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setUsers(userData)
+    })
+
+    return () => unsub()
+  }, [])
 
   const statusOptions = [
     { value: "", label: "All Statuses" },
@@ -108,20 +76,23 @@ const UserManagement = () => {
     setShowDeleteModal(true)
   }
 
-  const confirmSuspend = () => {
-    // Update user status logic here
+  const confirmSuspend = async () => {
+    await updateDoc(doc(db, "users", selectedUser.id), {
+      status: "suspended",
+    })
     setShowSuspendModal(false)
     setSelectedUser(null)
   }
 
-  const confirmActivate = () => {
-    // Update user status logic here
+  const confirmActivate = async () => {
+    await updateDoc(doc(db, "users", selectedUser.id), {
+      status: "active",
+    })
     setShowActivateModal(false)
     setSelectedUser(null)
   }
 
   const confirmDelete = () => {
-    // Delete user logic here
     setShowDeleteModal(false)
     setSelectedUser(null)
   }
@@ -231,21 +202,20 @@ const UserManagement = () => {
             transition={{ delay: index * 0.1 }}
             className="relative bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
           >
-            {/* Status badge - top-right */}
-            <div
-              className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm border ${getStatusColor(user.status)}`}
-            >
+            {/* Status */}
+            <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm border ${getStatusColor(user.status)}`}>
               {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
             </div>
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              {/* Left: User info & stats */}
               <div className="flex-1">
-                {/* Header: Avatar + name/email */}
+                {/* Avatar, Name, Email */}
                 <div className="flex items-center mb-4">
+                  {/* Avatar */}
                   <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
-                    <Users className="w-6 h-6 text-blue-400" />
+                    <User className="w-6 h-6 text-purple-400" />
                   </div>
+                  {/* Name, Email */}
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-1">{user.name}</h3>
                     <div className="flex items-center text-gray-400 text-sm">
@@ -255,8 +225,9 @@ const UserManagement = () => {
                   </div>
                 </div>
 
-                {/* Grid Info */}
+                {/* Phone, Join Date, Last Active, Total Bookings */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {/* Phone */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Phone</p>
                     <div className="flex items-center text-sm">
@@ -264,39 +235,71 @@ const UserManagement = () => {
                       <span className="text-white">{user.phone}</span>
                     </div>
                   </div>
+                  {/* Join Date */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Join Date</p>
-                    <p className="text-white font-medium">{user.joinDate}</p>
+                    <p className="text-white font-medium">
+                      {new Date(user.joinDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </p>
                   </div>
-                  <div>
+                  {/* Last Active */}
+                  {/* <div>
                     <p className="text-xs text-gray-400 mb-1">Last Active</p>
-                    <p className="text-white font-medium">{user.lastActive}</p>
-                  </div>
+                    <p className="text-white font-medium">
+                      {new Date(user.lastDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div> */}
+                  {/* Total Bookings */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Bookings</p>
                     <p className="text-white font-medium">{user.bookings}</p>
                   </div>
                 </div>
 
-                {/* Total Spent */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Address, Charging Hourse, Rating, Total Spent */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Address */}
+                  {/* <div>
+                    <p className="text-xs text-gray-400 mb-1">Address</p>
+                    <p className=" font-medium">{user.address}</p>
+                  </div> */}
+                  {/* Charging Hours */}
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Charging Hours</p>
+                    <p className="text-white font-medium">{user.chargingHours}</p>
+                  </div>
+                  {/* Rating */}
+                  {/* <div>
+                    <p className="text-xs text-gray-400 mb-1">Rating (out of 5)</p>
+                    <p className=" font-medium">{user.rating}</p>
+                  </div> */}
+                  {/* Total Spent */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Total Spent</p>
-                    <p className="text-green-400 font-medium">${user.totalSpent.toFixed(2)}</p>
+                    <p className="text-green-400 font-medium">₹ {user.expenditure}</p>
                   </div>
                 </div>
+
               </div>
 
-              {/* Right: Actions */}
+              {/* Actions */}
               <div className="mt-4 lg:mt-0 lg:ml-6 flex space-x-2">
-                <motion.button
+                {/* <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleUserActions(user)}
                   className="flex items-center px-3 py-2 bg-purple-400/10 text-purple-400 border border-purple-400/20 rounded-lg hover:bg-purple-400/20 transition-all duration-200"
                 >
                   <MoreHorizontal className="w-4 h-4" />
-                </motion.button>
+                </motion.button> */}
 
                 {user.status === "active" && (
                   <motion.button
@@ -322,6 +325,7 @@ const UserManagement = () => {
                   </motion.button>
                 )}
               </div>
+
             </div>
           </motion.div>
         ))}

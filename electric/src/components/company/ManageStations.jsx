@@ -1,30 +1,76 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Plus, Search, MapPin, Zap, Clock, Eye, AlertCircle, CheckCircle, MoreVertical } from "lucide-react"
-import { useUser } from "../../context/UserContext"
 import AddStationModal from "../modals/AddStationModal"
 import EditStationModal from "../modals/EditStationModal"
 import StationActionsModal from "../modals/StationActionsModal"
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore"
+import { db, auth } from "../../firebase/firebaseConfig"
 
 const ManageStations = () => {
-  const { stations, addStation, updateStation, deleteStation } = useUser()
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [selectedStation, setSelectedStation] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const [stations, setStations] = useState([])
+  const [user, setUser] = useState(null)
 
-  // Filter stations for current company (mock company ID = 1)
-  const companyStations = stations.filter((station) => station.companyId === 1)
+  useEffect(() => {
+    const unsubscribeAuth = auth.onAuthStateChanged((authUser) => {
+      setUser(authUser)
+    })
+    return () => unsubscribeAuth()
+  }, [])
 
-  // Filter by search term
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "stations"), (snapshot) => {
+      const stationList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setStations(stationList)
+    })
+    return () => unsub()
+  }, [])
+
+  const companyStations = stations.filter(
+    (station) => station.companyId === user?.uid
+  )
+
   const filteredStations = companyStations.filter(
     (station) =>
       station.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      station.address.toLowerCase().includes(searchTerm.toLowerCase()),
+      station.address.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const addStation = async (stationData) => {
+    await addDoc(collection(db, "stations"), {
+      ...stationData,
+      companyId: user.uid,
+      createdAt: serverTimestamp(),
+    })
+  }
+
+  const updateStation = async (stationId, updateData) => {
+    await updateDoc(doc(db, "stations", stationId), updateData)
+  }
+
+  const deleteStation = async (stationId) => {
+    await deleteDoc(doc(db, "stations", stationId))
+  }
 
   const handleStationActions = (station) => {
     setSelectedStation(station)
@@ -59,8 +105,6 @@ const ManageStations = () => {
     switch (status) {
       case "active":
         return "text-green-400 bg-green-400/10 border-green-400/20"
-      case "pending":
-        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
       case "inactive":
         return "text-red-400 bg-red-400/10 border-red-400/20"
       default:
@@ -72,8 +116,6 @@ const ManageStations = () => {
     switch (status) {
       case "active":
         return CheckCircle
-      case "pending":
-        return Clock
       case "inactive":
         return AlertCircle
       default:
@@ -116,115 +158,86 @@ const ManageStations = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Total Stations</p>
-              <p className="text-2xl font-bold text-white">{companyStations.length}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {[
+          {
+            title: "Total Stations",
+            value: companyStations.length,
+            icon: <MapPin className="w-6 h-6 text-blue-400" />,
+            bg: "bg-blue-400/10",
+          },
+          {
+            title: "Active Stations",
+            value: companyStations.filter((s) => s.status === "active").length,
+            icon: <CheckCircle className="w-6 h-6 text-green-400" />,
+            bg: "bg-green-400/10",
+            delay: 0.1,
+          },
+          {
+            title: "Total Chargers",
+            value: companyStations.reduce((sum, s) => sum + s.chargers, 0),
+            icon: <Zap className="w-6 h-6 text-purple-400" />,
+            bg: "bg-purple-400/10",
+            delay: 0.2,
+          },
+          {
+            title: "Avg. Rating",
+            value:
+              companyStations.length > 0
+                ? (
+                    companyStations.reduce((sum, s) => sum + s.rating, 0) / companyStations.length
+                  ).toFixed(1)
+                : "0.0",
+            icon: <Eye className="w-6 h-6 text-yellow-400" />,
+            bg: "bg-yellow-400/10",
+            delay: 0.3,
+          },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: stat.delay || 0 }}
+            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">{stat.title}</p>
+                <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
+              </div>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
+                {stat.icon}
+              </div>
             </div>
-            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-blue-400" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Active Stations</p>
-              <p className="text-2xl font-bold text-white">
-                {companyStations.filter((s) => s.status === "active").length}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-400" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Total Chargers</p>
-              <p className="text-2xl font-bold text-white">
-                {companyStations.reduce(
-                  (sum, station) => sum + Object.values(station.availability).reduce((a, b) => a + b, 0),
-                  0,
-                )}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
-              <Zap className="w-6 h-6 text-purple-400" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Avg. Rating</p>
-              <p className="text-2xl font-bold text-white">
-                {companyStations.length > 0
-                  ? (
-                      companyStations.reduce((sum, station) => sum + station.rating, 0) / companyStations.length
-                    ).toFixed(1)
-                  : "0.0"}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
-              <Eye className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        ))}
       </div>
 
       {/* Stations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredStations.map((station, index) => {
-          const StatusIcon = getStatusIcon(station.status)
+          const StatusIcon = getStatusIcon(station.status);
           return (
             <motion.div
               key={station.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
+              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
             >
               {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-1">{station.name}</h3>
-                  <div className="flex items-center text-gray-400 text-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-white">{station.name}</h3>
+                  <div className="flex items-center text-sm text-gray-400 mt-1">
                     <MapPin className="w-4 h-4 mr-1" />
-                    <span className="truncate">{station.address}</span>
+                    {station.address}, {station.city}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div
-                    className={`flex items-center px-2 py-1 rounded-full text-xs border ${getStatusColor(station.status)}`}
-                  >
+                  <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(station.status)}`}>
                     <StatusIcon className="w-3 h-3 mr-1" />
-                    {station.status.charAt(0).toUpperCase() + station.status.slice(1)}
+                    {station.status}
                   </div>
                   <button
                     onClick={() => handleStationActions(station)}
@@ -235,47 +248,42 @@ const ManageStations = () => {
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-4 text-center mt-2">
+                <div className="bg-gray-700/40 p-3 rounded-xl">
                   <p className="text-xs text-gray-400 mb-1">Total Chargers</p>
-                  <p className="text-lg font-bold text-white">
-                    {Object.values(station.availability).reduce((a, b) => a + b, 0)}
-                  </p>
+                  <p className="text-xl text-white font-semibold">{station.chargers}</p>
                 </div>
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="bg-gray-700/40 p-3 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
+                  <p className="text-xl text-white font-semibold">{station.vacantChargers}</p>
+                </div>
+                <div className="bg-gray-700/40 p-3 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-1">Bookings</p>
+                  <p className="text-xl text-white font-semibold">{station.completedBookings}</p>
+                </div>
+                <div className="bg-gray-700/40 p-3 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-1">Revenue</p>
+                  <p className="text-xl text-white font-semibold">₹ {station.revenue}</p>
+                </div>
+              </div>
+
+              {/* Bottom */}
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-700">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Price / min</p>
+                  <p className="text-sm text-white font-medium">₹ {station.pricePerMinute}</p>
+                </div>
+                <div className="text-right">
                   <p className="text-xs text-gray-400 mb-1">Rating</p>
-                  <p className="text-lg font-bold text-white">{station.rating} ⭐</p>
+                  <p className="text-sm text-white font-medium">{station.rating} ⭐</p>
                 </div>
-              </div>
-
-              {/* Charger Types */}
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2">Charger Types</p>
-                <div className="flex flex-wrap gap-1">
-                  {station.chargerTypes.map((type) => (
-                    <span
-                      key={type}
-                      className="px-2 py-1 bg-blue-400/10 text-blue-400 text-xs rounded border border-blue-400/20"
-                    >
-                      {type}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pricing */}
-              <div>
-                <p className="text-xs text-gray-400 mb-2">Pricing Range</p>
-                <p className="text-sm text-white font-medium">
-                  ${Math.min(...Object.values(station.pricePerMinute)).toFixed(2)} - $
-                  {Math.max(...Object.values(station.pricePerMinute)).toFixed(2)}/min
-                </p>
               </div>
             </motion.div>
-          )
+          );
         })}
       </div>
+
 
       {/* No Stations */}
       {filteredStations.length === 0 && (

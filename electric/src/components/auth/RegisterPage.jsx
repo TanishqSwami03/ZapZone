@@ -8,14 +8,13 @@ import { useUser } from "../../context/UserContext"
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
+    userType: "",       // 'user' or 'company'
     name: "",
     email: "",
-    phone: "",
     password: "",
-    confirmPassword: "",
-    userType: "user",
-    companyName: "",
-    agreeToTerms: false,
+    mobile: "",         // only for user
+    contactPerson: "",  // only for company
+    phone: "",          // only for company
   })
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)

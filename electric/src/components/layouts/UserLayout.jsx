@@ -1,18 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, History, User, Menu, X, Zap, LogOut, Wallet, Plus } from "lucide-react"
-import { useUser } from "../../context/UserContext"
 import AddFundsModal from "../modals/AddFundsModal"
+import { signOut, onAuthStateChanged } from "firebase/auth"
+import { auth, db } from "../../firebase/firebaseConfig"
+import { doc, getDoc, collection, query, where, getDocs, onSnapshot } from "firebase/firestore"
 
 const UserLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showAddFunds, setShowAddFunds] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout, currentUser } = useUser()
+  const [userData, setUserData] = useState(null)
 
   const navigation = [
     { name: "Browse Stations", href: "/user/browse", icon: Search },
@@ -20,14 +23,50 @@ const UserLayout = ({ children }) => {
     { name: "Profile", href: "/user/profile", icon: User },
   ]
 
-  const handleLogout = () => {
-    logout()
-    navigate("/")
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      navigate("/")
+    } catch (err) {
+      console.error("Logout failed", err)
+    }
   }
+
+  const currentUser = auth.currentUser
+
+  useEffect(() => {
+    let unsubscribeUser = null
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.log("User not logged in")
+        return
+      }
+
+      const q = query(collection(db, "users"), where("uid", "==", user.uid))
+
+      unsubscribeUser = onSnapshot(q, (querySnapshot) => {
+        if (!querySnapshot.empty) {
+          const userDocData = querySnapshot.docs[0].data()
+          console.log("🔄 Realtime User data:", userDocData)
+          setUserData(userDocData)
+        } else {
+          console.warn("⚠️ No matching user found in Firestore")
+        }
+      }, (err) => {
+        console.error("❌ Firestore listener error:", err)
+      })
+    })
+
+    return () => {
+      if (unsubscribeUser) unsubscribeUser()
+      unsubscribeAuth()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
-      {/* Mobile sidebar backdrop */}
+      {/* Mobile backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -40,7 +79,7 @@ const UserLayout = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar - Hidden on mobile, visible on desktop */}
+      {/* Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex flex-col flex-grow bg-gray-800 border-r border-gray-700">
           <div className="flex items-center h-16 px-6 border-b border-gray-700">
@@ -48,16 +87,8 @@ const UserLayout = ({ children }) => {
             <motion.span
               style={{ fontFamily: "'Monoton', sans-serif", fontStyle: "normal" }}
               className="text-white text-2xl tracking-wide uppercase relative overflow-hidden"
-              animate={{
-                x: [0, -2, 2, -1, 1, 0],
-                skewX: [0, 5, -5, 3, -3, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                repeatType: "loop",
-                ease: "easeInOut",
-              }}
+              animate={{ x: [0, -2, 2, -1, 1, 0], skewX: [0, 5, -5, 3, -3, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             >
               Zap<span className="text-green-400">Zone</span>
             </motion.span>
@@ -86,24 +117,24 @@ const UserLayout = ({ children }) => {
             })}
           </nav>
 
-          {/* Wallet section below nav */}
+          {/* Wallet Section */}
           <div className="px-6 py-3 border-t border-gray-700">
             <div className="flex items-center space-x-4 bg-gray-700 rounded-lg px-3 py-2">
               <Wallet className="w-5 h-5 text-green-400" />
-              <span className="text-white font-medium">$ 125.50</span>
+              ₹ {userData?.wallet !== undefined ? userData.wallet.toFixed(2) : "Can't Load"}
               <button
                 onClick={() => setShowAddFunds(true)}
                 className="bg-green-400 text-gray-900 p-1 rounded hover:bg-green-300 transition-colors ml-auto"
-                aria-label="Add funds"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
 
+          {/* Logout Button */}
           <div className="absolute bottom-4 left-4 right-4 border-t border-gray-700 pt-4">
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutModal(true)}
               className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
             >
               <LogOut className="w-5 h-5 mr-3" />
@@ -113,7 +144,7 @@ const UserLayout = ({ children }) => {
         </div>
       </div>
 
-      {/* Mobile sidebar */}
+      {/* Mobile Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -127,18 +158,10 @@ const UserLayout = ({ children }) => {
               <div className="flex items-center">
                 <Zap className="w-8 h-8 text-green-400 mr-2" />
                 <motion.span
-                  style={{ fontFamily: "'Monoton', sans-serif", fontStyle: "normal" }}
-                  className="text-white text-xl tracking-wide uppercase relative overflow-hidden"
-                  animate={{
-                    x: [0, -2, 2, -1, 1, 0],
-                    skewX: [0, 5, -5, 3, -3, 0],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: "loop",
-                    ease: "easeInOut",
-                  }}
+                  style={{ fontFamily: "'Monoton', sans-serif" }}
+                  className="text-white text-xl tracking-wide uppercase"
+                  animate={{ x: [0, -2, 2, -1, 1, 0], skewX: [0, 5, -5, 3, -3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   Zap<span className="text-green-400">Zone</span>
                 </motion.span>
@@ -155,12 +178,12 @@ const UserLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
                       isActive
                         ? "bg-green-400/10 text-green-400 border border-green-400/20"
                         : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
-                    onClick={() => setSidebarOpen(false)}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
                     {item.name}
@@ -172,15 +195,13 @@ const UserLayout = ({ children }) => {
               })}
             </nav>
 
-            {/* Wallet section below nav */}
             <div className="px-6 py-3 border-t border-gray-700">
               <div className="flex items-center space-x-4 bg-gray-700 rounded-lg px-3 py-2">
                 <Wallet className="w-5 h-5 text-green-400" />
-                <span className="text-white font-medium">$ 125.50</span>
+                <span className="text-white font-medium">₹ {userData?.wallet !== undefined ? userData.wallet.toFixed(2) : "Can't Load"}</span>
                 <button
                   onClick={() => setShowAddFunds(true)}
                   className="bg-green-400 text-gray-900 p-1 rounded hover:bg-green-300 transition-colors ml-auto"
-                  aria-label="Add funds"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -189,7 +210,7 @@ const UserLayout = ({ children }) => {
 
             <div className="absolute bottom-4 left-4 right-4 border-t border-gray-700 pt-4">
               <button
-                onClick={handleLogout}
+                onClick={() => setShowLogoutModal(true)}
                 className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
               >
                 <LogOut className="w-5 h-5 mr-3" />
@@ -200,34 +221,52 @@ const UserLayout = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {/* Main content */}
+      {/* Main Content */}
       <div className="flex-1 lg:pl-64">
-        {/* Header */}
         <header className="bg-gray-800 border-b border-gray-700 h-16 flex items-center justify-between px-6">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-400 hover:text-white">
             <Menu className="w-6 h-6" />
           </button>
-
-          {/* Empty space for mobile */}
           <div className="lg:hidden"></div>
-
           <div className="flex items-center space-x-4">
             <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-gray-900" />
             </div>
             <div className="text-white text-right">
               <span className="text-m text-gray-400">Welcome back, </span>
-              <span className="font-medium">{currentUser?.name || "John Doe"}</span>
+              <span className="font-medium">{userData?.name || "Loading..."}</span>  
             </div>
           </div>
         </header>
-
-        {/* Page content */}
         <main className="p-6">{children}</main>
       </div>
 
       {/* Add Funds Modal */}
       <AddFundsModal isOpen={showAddFunds} onClose={() => setShowAddFunds(false)} />
+
+      {/* Logout Confirm Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 backdrop-blur-lg bg-opacity-50 flex items-center justify-center">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700">
+            <h2 className="text-white text-lg font-semibold mb-4">Confirm Logout</h2>
+            <p className="text-gray-300 mb-6">Are you sure you want to logout?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  
     </div>
   )
 }

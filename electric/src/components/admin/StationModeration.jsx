@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { CheckCircle, XCircle, Clock, MapPin, Building2, AlertTriangle, Search, Ban, MoreVertical } from "lucide-react"
-import { useUser } from "../../context/UserContext"
 import ConfirmModal from "../modals/ConfirmModal"
 import StationModerationModal from "../modals/StationModerationModal"
+import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore"
+import { db } from "../../firebase/firebaseConfig"
 
 const StationModeration = () => {
-  const { stations, updateStation, deleteStation } = useUser()
   const [selectedStatus, setSelectedStatus] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [showApproveModal, setShowApproveModal] = useState(false)
@@ -18,13 +18,47 @@ const StationModeration = () => {
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [selectedStation, setSelectedStation] = useState(null)
 
-  const statusOptions = [
-    { value: "pending", label: "Pending Review" },
-    { value: "active", label: "Approved" },
-    { value: "rejected", label: "Rejected" },
-    { value: "suspended", label: "Suspended" },
-    { value: "", label: "All Stations" },
-  ]
+  const [stations, setStations] = useState([])
+  const [companies, setCompanies] = useState([])
+
+  // Stations
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "stations"), (snapshot) => {
+      if (!snapshot.empty && Array.isArray(snapshot.docs)) {
+        const stationsData = snapshot.docs.map((doc) => {
+          const data = doc.data() || {} // ⬅️ Ensure `data` is never undefined
+          return {
+            id: doc.id,
+            ...data,
+          }
+        })
+        setStations(stationsData)
+      } else {
+        setStations([]) // handle empty snapshot
+      }
+    })
+
+    return () => unsub()
+  }, [])
+
+  // Company
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "companies"), (snapshot) => {
+      const companiesData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setCompanies(companiesData)
+    })
+
+    return () => unsub()
+  }, [])
+
+  // Getting Company Name
+  const getCompanyName = (companyId) => {
+    const company = companies.find((c) => String(c.id) === String(companyId))
+    return company ? company.name : "Unknown Company"
+  }
 
   // Filter by status and search term
   const filteredStations = stations.filter((station) => {
@@ -37,18 +71,25 @@ const StationModeration = () => {
     return matchesStatus && matchesSearch
   })
 
-  const getCompanyName = (companyId) => {
-    switch (companyId) {
-      case 1:
-        return "EV Solutions Inc."
-      case 2:
-        return "PowerCharge Corp."
-      case 3:
-        return "GreenEnergy Ltd."
-      default:
-        return "Unknown Company"
-    }
+  const statusOptions = [
+    { value: "", label: "All Stations" },
+    { value: "pending", label: "Pending Review" },
+    { value: "active", label: "Approved" },
+    { value: "rejected", label: "Rejected" },
+    { value: "suspended", label: "Suspended" },
+  ]
+
+  // Update station status
+  const updateStation = async (stationId, updatedData) => {
+    const stationRef = doc(db, "stations", stationId)
+    await updateDoc(stationRef, updatedData)
   }
+
+  // Delete a station
+  const deleteStation = async (stationId) => {
+    const stationRef = doc(db, "stations", stationId)
+    await deleteDoc(stationRef)
+  } 
 
   const handleStationActions = (station) => {
     setSelectedStation(station)
@@ -75,9 +116,9 @@ const StationModeration = () => {
     setShowDeleteModal(true)
   }
 
-  const confirmApprove = () => {
+  const confirmApprove = async () => {
     if (selectedStation) {
-      updateStation(selectedStation.id, { status: "active" })
+      await updateStation(selectedStation.id, { status: "active" })
       setShowApproveModal(false)
       setSelectedStation(null)
     }
@@ -91,9 +132,9 @@ const StationModeration = () => {
     }
   }
 
-  const confirmSuspend = () => {
+  const confirmSuspend = async () => {
     if (selectedStation) {
-      updateStation(selectedStation.id, { status: "suspended" })
+      await updateStation(selectedStation.id, { status: "suspended" })
       setShowSuspendModal(false)
       setSelectedStation(null)
     }
@@ -181,6 +222,8 @@ const StationModeration = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+        {/* Total Stations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -197,7 +240,8 @@ const StationModeration = () => {
           </div>
         </motion.div>
 
-        <motion.div
+        {/* Pending */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -212,8 +256,9 @@ const StationModeration = () => {
               <Clock className="w-6 h-6 text-yellow-400" />
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
+        {/* Active */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -231,6 +276,7 @@ const StationModeration = () => {
           </div>
         </motion.div>
 
+        {/* Suspended */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -248,7 +294,8 @@ const StationModeration = () => {
           </div>
         </motion.div>
 
-        <motion.div
+        {/* Rejected */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -263,11 +310,11 @@ const StationModeration = () => {
               <XCircle className="w-6 h-6 text-red-400" />
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
 
       {/* Stations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {filteredStations.map((station, index) => {
           const StatusIcon = getStatusIcon(station.status)
           return (
@@ -278,7 +325,7 @@ const StationModeration = () => {
               transition={{ delay: index * 0.1 }}
               className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
             >
-              {/* Header */}
+              {/* Name, address, companyName, status */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-white mb-1">{station.name}</h3>
@@ -304,36 +351,49 @@ const StationModeration = () => {
                 </div>
               </div>
 
-              {/* Stats */}
+              {/* Chargers, Vacant Chargers, Completed Bookings */}
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="text-center p-3 bg-gray-700/50 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Chargers</p>
                   <p className="text-sm font-bold text-white">
-                    {Object.values(station.availability).reduce((a, b) => a + b, 0)}
+                    {station.chargers} 
+                  </p>
+                </div>
+                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
+                  <p className="text-sm font-bold text-white">{station.vacantChargers}</p>
+                </div>
+                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">Completed Bookings</p>
+                  <p className="text-sm font-bold text-white">{station.completedBookings}</p>
+                </div>
+              </div>
+
+              {/* Revenue, Rating */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                  <p className="text-xs text-gray-400 mb-1">Revenue</p>
+                  <p className="text-sm font-bold text-green-400">
+                    ₹ {station.revenue} 
                   </p>
                 </div>
                 <div className="text-center p-3 bg-gray-700/50 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Rating</p>
                   <p className="text-sm font-bold text-white">{station.rating} ⭐</p>
                 </div>
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
-                  <p className="text-xs text-gray-400 mb-1">Reviews</p>
-                  <p className="text-sm font-bold text-white">{station.reviews}</p>
-                </div>
-              </div>
+              </div>  
 
-              {/* Charger Types */}
+              {/* Created At */}
               <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2">Charger Types</p>
+                <p className="text-xs text-gray-400 mb-2">Created At</p>
                 <div className="flex flex-wrap gap-1">
-                  {station.chargerTypes.map((type) => (
-                    <span
-                      key={type}
-                      className="px-2 py-1 bg-purple-400/10 text-purple-400 text-xs rounded border border-purple-400/20"
-                    >
-                      {type}
+                    <span className="px-2 py-1 bg-purple-400/10 text-purple-400 text-xs rounded border border-purple-400/20">
+                      {station.createdAt.toDate().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </span>
-                  ))}
                 </div>
               </div>
 
@@ -381,10 +441,11 @@ const StationModeration = () => {
         isOpen={showActionsModal}
         onClose={() => setShowActionsModal(false)}
         station={selectedStation}
+        company={getCompanyName(selectedStation?.companyId)}
         onApprove={handleApprove}
         onReject={handleReject}
         onSuspend={handleSuspend}
-        onDelete={handleDelete}
+        // onDelete={handleDelete}
       />
 
       <ConfirmModal

@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { Building2, Search, MoreHorizontal, Ban, CheckCircle, Mail, Phone, MapPin, Calendar } from "lucide-react"
 import ConfirmModal from "../modals/ConfirmModal"
 import CompanyActionsModal from "../modals/CompanyActionsModal"
-import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore"
+import { collection, onSnapshot, updateDoc, doc, query, where, getDocs } from "firebase/firestore"
 import { db } from "../../firebase/firebaseConfig"
 
 const CompanyManagement = () => {
@@ -18,7 +18,6 @@ const CompanyManagement = () => {
 
   const [companies, setCompanies] = useState([])
 
-  // Mock company data
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "companies"), (snapshot) => {
       const companyData = snapshot.docs.map((doc) => ({
@@ -104,19 +103,63 @@ const CompanyManagement = () => {
   }
 
   const confirmSuspend = async () => {
-    await updateDoc(doc(db, "companies", selectedCompany.id), {
-      status: "suspended",
-    })
-    setShowSuspendModal(false)
-    setSelectedCompany(null)
+    try {
+      // 1. Suspend the company
+      await updateDoc(doc(db, "companies", selectedCompany.id), {
+        status: "suspended",
+      })
+
+      // 2. Get all stations owned by this company
+      const stationsQuery = query(
+        collection(db, "stations"),
+        where("companyId", "==", selectedCompany.id)
+      )
+      const querySnapshot = await getDocs(stationsQuery)
+
+      // 3. Update each station's status to "suspended"
+      const updates = querySnapshot.docs.map((docSnap) =>
+        updateDoc(doc(db, "stations", docSnap.id), {
+          status: "suspended",
+        })
+      )
+      await Promise.all(updates)
+
+      // 4. Close modal and clear selection
+      setShowSuspendModal(false)
+      setSelectedCompany(null)
+    } catch (error) {
+      console.error("Error suspending company and stations:", error)
+    }
   }
 
   const confirmActivate = async () => {
-    await updateDoc(doc(db, "companies", selectedCompany.id), {
-      status: "active",
-    })
-    setShowActivateModal(false)
-    setSelectedCompany(null)
+    try {
+      // 1. Activate the company
+      await updateDoc(doc(db, "companies", selectedCompany.id), {
+        status: "active",
+      })
+
+      // 2. Get all stations owned by this company
+      const stationsQuery = query(
+        collection(db, "stations"),
+        where("companyId", "==", selectedCompany.id)
+      )
+      const querySnapshot = await getDocs(stationsQuery)
+
+      // 3. Update each station's status to "active"
+      const updates = querySnapshot.docs.map((docSnap) =>
+        updateDoc(doc(db, "stations", docSnap.id), {
+          status: "active",
+        })
+      )
+      await Promise.all(updates)
+
+      // 4. Close modal and clear selection
+      setShowActivateModal(false)
+      setSelectedCompany(null)
+    } catch (error) {
+      console.error("Error activating company and stations:", error)
+    }
   }
 
   const totalCompanies = companies.length
@@ -267,10 +310,12 @@ const CompanyManagement = () => {
 
                 {/* Info grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {/* Contact Person */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Contact Person</p>
                     <p className="text-white font-medium">{company.contactPerson}</p>
                   </div>
+                  {/* Phone */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Phone</p>
                     <div className="flex items-center text-sm">
@@ -278,51 +323,61 @@ const CompanyManagement = () => {
                       <span className="text-white ml-1">{company.phone}</span>
                     </div>
                   </div>
+                  {/* Join Date */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Join Date</p>
-                    <p className="text-white font-medium">{company.joinDate.toDate().toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    <p className="text-white font-medium">
+                      {new Date(company.joinDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </p>
                   </div>
-                  <div>
+                  {/* Last Active */}
+                  {/* <div>
                     <p className="text-xs text-gray-400 mb-1">Last Active</p>
-                    <p className="text-white font-medium">{company.lastActive.toDate().toLocaleString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    })}</p>
-                  </div>
+                    <p className="text-white font-medium">
+                      {new Date(company.lastActive).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div> */}
                 </div>
 
-                {/* Address, Stations, Earnings */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Rating, Stations, Revenue */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Avg Rating */}
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Avg. Rating</p>
+                    <p className="text-white font-medium">{company.avgRating}</p>
+                  </div>
+                  {/* Tatal Stations */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Stations</p>
                     <p className="text-white font-medium">{company.stationCount}</p>
                   </div>
+                  {/* Total Earnings */}
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">Total Earnings</p>
+                    <p className="text-xs text-gray-400 mb-1">Total Revenue</p>
                     <p className="text-green-400 font-medium">₹ {company.totalRevenue}</p>
                   </div>
                 </div>
+
               </div>
 
               {/* Actions */}
               <div className="mt-4 lg:mt-0 lg:ml-6 flex space-x-2">
-                <motion.button
+                {/* <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleActionsClick(company)}
                   className="flex items-center px-3 py-2 bg-purple-400/10 text-purple-400 border border-purple-400/20 rounded-lg hover:bg-purple-400/20 transition-all duration-200"
                 >
                   <MoreHorizontal className="w-4 h-4" />
-                </motion.button>
+                </motion.button> */}
 
                 {company.status === "active" && (
                   <motion.button

@@ -5,7 +5,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Shield, BarChart3, Menu, X, Zap, LogOut, Building2, User, Home } from "lucide-react"
 import { useUser } from "../../context/UserContext"
-import ConfirmModal from "../modals/ConfirmModal"
+import { signOut, onAuthStateChanged } from "firebase/auth"
+import { auth, db } from "../../firebase/firebaseConfig"
+import { doc, getDoc, collection, query, where, getDocs, onSnapshot } from "firebase/firestore"
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -25,9 +27,13 @@ const AdminLayout = ({ children }) => {
 
   const reportsNavigation = [{ name: "Analytics & Reports", href: "/admin/reports", icon: BarChart3 }]
 
-  const handleLogout = () => {
-    logout()
-    navigate("/")
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      navigate("/")
+    } catch (err) {
+      console.error("Logout failed", err)
+    }
   }
 
   const confirmLogout = () => {
@@ -42,16 +48,6 @@ const AdminLayout = ({ children }) => {
     return location.pathname === href
   }
 
-  // const getPageTitle = () => {
-  //   const path = location.pathname
-  //   if (path === "/admin" || path === "/admin/") return "Dashboard Overview"
-  //   if (path === "/admin/stations") return "Station Moderation"
-  //   if (path === "/admin/users") return "User Management"
-  //   if (path === "/admin/companies") return "Company Management"
-  //   if (path === "/admin/reports") return "Analytics & Reports"
-  //   return "Admin Dashboard"
-  // }
-
   return (
     <div className="min-h-screen bg-gray-900 flex">
       {/* Mobile sidebar backdrop */}
@@ -61,7 +57,7 @@ const AdminLayout = ({ children }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 backdrop-blur-sm bg-opacity-50 z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -370,11 +366,6 @@ const AdminLayout = ({ children }) => {
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Page Title - visible on desktop */}
-          {/* <div className="hidden lg:block">
-            <h1 className="text-lg font-semibold text-white">{getPageTitle()}</h1>
-          </div> */}
-
           {/* User info - always on the right */}
           <div className="flex items-center space-x-4">
             <div className="text-white text-right">
@@ -392,15 +383,28 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* Logout Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={confirmLogout}
-        title="Confirm Logout"
-        message="Are you sure you want to logout? You will need to sign in again to access your account."
-        confirmText="Logout"
-        confirmColor="red"
-      />
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 backdrop-blur-lg bg-opacity-50 flex items-center justify-center">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm border border-gray-700">
+            <h2 className="text-white text-lg font-semibold mb-4">Confirm Logout</h2>
+            <p className="text-gray-300 mb-6">Are you sure you want to logout?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}  
     </div>
   )
 }
