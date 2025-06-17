@@ -16,14 +16,6 @@ const BrowseStations = () => {
   const [selectedStation, setSelectedStation] = useState(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
 
-  const chargerTypes = ["DC Fast", "Level 2", "Level 1"]
-  const locations = ["Downtown District", "Shopping District", "Highway 101"]
-  const priceRanges = [
-    { label: "Under $0.30/min", value: "low" },
-    { label: "$0.30 - $0.50/min", value: "medium" },
-    { label: "Over $0.50/min", value: "high" },
-  ]
-
   const filteredStations = stations.filter((station) => {
     const matchesSearch =
       station.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,20 +47,6 @@ const BrowseStations = () => {
   const handleBookStation = (station) => {
     setSelectedStation(station)
     setShowBookingModal(true)
-  }
-
-  const getAmenityIcon = (amenity) => {
-    switch (amenity.toLowerCase()) {
-      case "wifi":
-        return Wifi
-      case "cafe":
-      case "food court":
-        return Coffee
-      case "restroom":
-        return Car
-      default:
-        return MapPin
-    }
   }
 
   return (
@@ -195,81 +173,44 @@ const BrowseStations = () => {
             {/* Station Header */}
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-white group-hover:text-green-400 transition-colors">
+                <h3 className="text-lg font-bold text-white group-hover:text-green-400 transition-colors">
                   {station.name}
                 </h3>
                 <div className="flex items-center text-gray-400 text-sm mt-1">
                   <MapPin className="w-4 h-4 mr-1" />
-                  {station.location}
+                  {station.address}, {station.city}
                 </div>
               </div>
               <div className="flex items-center text-yellow-400">
                 <Star className="w-4 h-4 mr-1 fill-current" />
                 <span className="text-sm font-medium">{station.rating}</span>
-                <span className="text-gray-400 text-xs ml-1">({station.reviews})</span>
-              </div>
-            </div>
-
-            {/* Charger Types */}
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-2">
-                {/* {station.chargerTypes.map((type) => (
-                  <span
-                    key={type}
-                    className="px-3 py-1 bg-green-400/10 text-green-400 text-xs rounded-full border border-green-400/20"
-                  >
-                    {type}
-                  </span>
-                ))} */}
+                {/* <span className="text-gray-400 text-xs ml-1">({station.reviews})</span> */}
               </div>
             </div>
 
             {/* Availability & Pricing */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <div className="text-xs text-gray-400 mb-1">Availability</div>
-                {/* {Object.entries(station.availability).map(([type, count]) => (
-                  <div key={type} className="flex items-center text-sm">
-                    <Zap className="w-3 h-3 mr-1 text-green-400" />
-                    <span className="text-white">
-                      {count} {type}
-                    </span>
-                  </div>
-                ))} */}
+                <div className="text-xs text-gray-400 mb-1">Vacant Chargers</div>
+                {station.vacantChargers}
               </div>
               <div>
                 <div className="text-xs text-gray-400 mb-1">Pricing</div>
-                {/* {Object.entries(station.pricePerMinute).map(([type, price]) => (
-                  <div key={type} className="flex items-center text-sm">
-                    <DollarSign className="w-3 h-3 mr-1 text-blue-400" />
-                    <span className="text-white">${price}/min</span>
-                  </div>
-                ))} */}
+                ₹ {station.pricePerMinute} / min. 
               </div>
             </div>
 
             {/* Amenities */}
             <div className="mb-6">
-              <div className="text-xs text-gray-400 mb-2">Amenities</div>
+              <div className="text-xs text-gray-400 mb-2">Completed Bookings</div>
               <div className="flex flex-wrap gap-2">
-                {/* {station.amenities.map((amenity) => {
-                  const IconComponent = getAmenityIcon(amenity)
-                  return (
-                    <div
-                      key={amenity}
-                      className="flex items-center px-2 py-1 bg-gray-700 rounded text-xs text-gray-300"
-                    >
-                      <IconComponent className="w-3 h-3 mr-1" />
-                      {amenity}
-                    </div>
-                  )
-                })} */}
+                {station.completedBookings}
               </div>
             </div>
 
             {/* Book Button - fixed at bottom */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleBookStation(station)}
               className="mt-auto w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300"
