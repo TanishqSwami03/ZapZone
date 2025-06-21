@@ -7,11 +7,18 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <motion.div
+          key="charging-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50"
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
           >
             {/* Header */}
@@ -43,7 +50,7 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
               </p>
             </div>
 
-            {/* Confirmation Question */}
+            {/* Confirmation */}
             <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-4 mb-6">
               <div className="flex items-start">
                 <Zap className="w-5 h-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
@@ -51,7 +58,7 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Buttons */}
             <div className="flex space-x-3">
               <button
                 onClick={onClose}
@@ -67,7 +74,7 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
               </button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   )

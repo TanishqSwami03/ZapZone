@@ -2,26 +2,24 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Star, MessageSquare } from "lucide-react"
+import { X, Star } from "lucide-react"
 
 const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
   const [rating, setRating] = useState(0)
   const [hoveredRating, setHoveredRating] = useState(0)
-  const [comment, setComment] = useState("")
 
   const handleSubmit = () => {
     if (rating > 0) {
-      onSubmit(booking.id, rating, comment)
+      onSubmit(booking.id, rating)
       setRating(0)
       setHoveredRating(0)
-      setComment("")
     }
   }
 
   const handleClose = () => {
     setRating(0)
     setHoveredRating(0)
-    setComment("")
+    setSubmitted(false)
     onClose()
   }
 
@@ -40,7 +38,7 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-white">Leave a Review</h2>
+                <h2 className="text-xl font-bold text-white">Leave a Rating</h2>
                 <p className="text-gray-400 text-sm">{booking.stationName}</p>
               </div>
               <button onClick={handleClose} className="text-gray-400 hover:text-white transition-colors">
@@ -60,12 +58,8 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
                   <p className="text-white font-medium">{booking.duration} min</p>
                 </div>
                 <div>
-                  <p className="text-gray-400">Charger Type</p>
-                  <p className="text-white font-medium">{booking.chargerType}</p>
-                </div>
-                <div>
                   <p className="text-gray-400">Cost</p>
-                  <p className="text-white font-medium">${booking.cost.toFixed(2)}</p>
+                  <p className="text-white font-medium">₹ {booking.cost.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -107,7 +101,7 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
             </div>
 
             {/* Comment */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <label className="block text-white font-medium mb-3">
                 <MessageSquare className="w-4 h-4 inline mr-2" />
                 Add a comment (optional)
@@ -119,7 +113,7 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
                 rows={4}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 resize-none"
               />
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex space-x-3">
@@ -136,7 +130,7 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
                 disabled={rating === 0}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Review
+                Submit Rating
               </motion.button>
             </div>
           </motion.div>

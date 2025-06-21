@@ -1,16 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Calendar, Clock, Zap, DollarSign, MapPin, CheckCircle, IndianRupee } from "lucide-react"
-import { useUser } from "../../context/UserContext"
+import { db } from "../../firebase/firebaseConfig"
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore"
+
 
 const BookingModal = ({ isOpen, onClose, station }) => {
-  const { addBooking, walletBalance } = useUser()
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false)
-
   const [duration, setDuration] = useState(30)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [wallet, setWallet] = useState(0)
+  const [userId, setUserId] = useState(null)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user")
+      if (stored) {
+        try {
+          const user = JSON.parse(stored)
+          if (user.uid) {
+            setUserId(user.uid)
+          }
+        } catch (error) {
+          console.error("Invalid user in localStorage")
+        }
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!userId) return
+      const userRef = doc(db, "users", userId)
+      const userSnap = await getDoc(userRef)
+      if (userSnap.exists()) {
+        const data = userSnap.data()
+        setWallet(data.wallet || 0)
+      }
+    }
+
+    fetchBalance()
+  }, [userId])
+
 
   const durationOptions = [15, 30, 45, 60, 90, 120]
 
@@ -20,36 +53,74 @@ const BookingModal = ({ isOpen, onClose, station }) => {
     return pricePerMinute * duration
   }
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     const cost = calculateCost()
 
-    if (walletBalance < cost) {
+    if (!station || !userId) return
+
+    // Fetch latest wallet value before booking
+    const userRef = doc(db, "users", userId)
+    const userSnap = await getDoc(userRef)
+
+    if (!userSnap.exists()) return
+
+    const userData = userSnap.data()
+    const latestWallet = userData.wallet || 0
+
+    if (latestWallet < cost) {
       setShowInsufficientFunds(true)
       return
     }
+
     const now = new Date().toString()
-    const onlyDate = now.split(' ').slice(0, 4).join(' ');
-    const onlyTime = now.split(' ')[4];
+    const onlyDate = now.split(" ").slice(0, 4).join(" ")
+    const onlyTime = now.split(" ")[4]
 
     const booking = {
+      userId,
       stationId: station.id,
       stationName: station.name,
       date: onlyDate,
       time: onlyTime,
       duration,
       cost,
+      status: "confirmed",
+      createdAt: serverTimestamp(),
     }
 
-    addBooking(booking)
-    setShowConfirmation(true)
+    try {
+      // Add booking
+      await addDoc(collection(db, "bookings"), booking)
 
-    setTimeout(() => {
-      setShowConfirmation(false)
-      resetForm()
-      onClose()
-    }, 2000)
+      // Update user wallet, expenditure, chargingHours, bookings
+      await setDoc(userRef, {
+        wallet: latestWallet - cost,
+        expenditure: (userData.expenditure || 0) + cost,
+        chargingHours: (userData.chargingHours || 0) + duration,
+        bookings: (userData.bookings || 0) + 1
+      }, { merge: true })
+
+      // Update station: revenue, completedBookings, vacantChargers
+      const stationRef = doc(db, "stations", station.id)
+      const stationSnap = await getDoc(stationRef)
+      const stationData = stationSnap.data()
+
+      await setDoc(stationRef, {
+        revenue: (stationData.revenue || 0) + cost,
+        completedBookings: (stationData.completedBookings || 0) + 1,
+        vacantChargers: Math.max((stationData.vacantChargers || 0) - 1, 0)
+      }, { merge: true })
+
+      setShowConfirmation(true)
+      setTimeout(() => {
+        setShowConfirmation(false)
+        resetForm()
+        onClose()
+      }, 2000)
+    } catch (error) {
+      console.error("Booking failed:", error)
+    }
   }
-
 
   const resetForm = () => {
     setDuration(30)
@@ -73,27 +144,27 @@ const BookingModal = ({ isOpen, onClose, station }) => {
             className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700"
           >
             <AnimatePresence>
-  {showInsufficientFunds && (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 rounded-xl"
-    >
-      <div className="bg-gray-900 p-6 rounded-lg text-center border border-red-500 max-w-sm w-full">
-        <h3 className="text-xl font-semibold text-red-400 mb-2">Insufficient Balance</h3>
-        <p className="text-gray-300 mb-4">You don't have enough balance to book this session.</p>
-        <p className="text-gray-400 mb-4">Your Wallet: ₹{walletBalance.toFixed(2)}</p>
-        <button
-          onClick={() => setShowInsufficientFunds(false)}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-        >
-          Close
-        </button>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+              {showInsufficientFunds && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute inset-0 backdrop-blur-sm bg-opacity-80 flex items-center justify-center z-50 rounded-xl"
+                >
+                  <div className="bg-gray-900 p-6 rounded-lg text-center border border-red-500 max-w-sm w-full">
+                    <h3 className="text-xl font-semibold text-red-400 mb-2">Insufficient Balance</h3>
+                    <p className="text-gray-300 mb-4">You don't have enough balance to book this session.</p>
+                    <p className="text-gray-400 mb-4">Your Wallet: ₹{wallet.toFixed(2)}</p>
+                    <button
+                      onClick={() => setShowInsufficientFunds(false)}
+                      className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {!showConfirmation ? (
               <>
