@@ -87,6 +87,7 @@ const BookingHistory = () => {
         // Optionally mark as completed immediately if it's over and not updated
         if (remaining <= 0 && booking.status === "charging") {
           updateBooking(booking.id, { status: "completed" })
+          incrementVacantCharger(booking.stationId)
         }
       }
     })
@@ -115,6 +116,22 @@ const BookingHistory = () => {
 
     return () => clearInterval(interval)
   }, [bookings, updateBooking])
+
+  const incrementVacantCharger = async (stationId) => {
+    try {
+      const stationRef = doc(db, "stations", stationId)
+      const stationSnap = await getDoc(stationRef)
+
+      if (stationSnap.exists()) {
+        const currentVacant = stationSnap.data().vacantChargers || 0
+        await updateDoc(stationRef, {
+          vacantChargers: currentVacant + 1
+        })
+      }
+    } catch (error) {
+      console.error("Error incrementing vacant chargers:", error)
+    }
+  }
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesStatus = !selectedStatus || booking.status === selectedStatus
@@ -190,15 +207,46 @@ const BookingHistory = () => {
     })
   }
 
-  const handleReviewSubmit = (bookingId, rating) => {
-    updateBooking(bookingId, { rating })
-    setShowReviewModal(false)
-    setSelectedBooking(null)
-    setShowRatingConfirmation(true)
+  const handleReviewSubmit = async (bookingId, rating) => {
+    try {
+      // 1. Update the rating in the booking
+      await updateBooking(bookingId, { rating })
 
-    setTimeout(() => {
-      setShowRatingConfirmation(false)
-    }, 4500)
+      // 2. Get booking details (to fetch stationId)
+      const bookingDoc = await getDoc(doc(db, "bookings", bookingId))
+      const stationId = bookingDoc.data()?.stationId
+      if (!stationId) throw new Error("Station ID not found in booking.")
+
+      // 3. Get the station document
+      const stationRef = doc(db, "stations", stationId)
+      const stationSnap = await getDoc(stationRef)
+
+      if (stationSnap.exists()) {
+        const stationData = stationSnap.data()
+        const prevAvg = stationData.rating || 0
+        const totalCompleted = stationData.completedBookings || 1 // avoid divide-by-zero
+
+        // 4. Calculate new average:
+        // newAvg = ((prevAvg * (n - 1)) + newRating) / n
+        const newAvgRating = ((prevAvg * (totalCompleted - 1)) + rating) / totalCompleted
+
+        // 5. Update the station's average rating
+        await updateDoc(stationRef, {
+          rating: newAvgRating,
+        })
+      }
+
+      // 6. Close modal + show confirmation
+      setShowReviewModal(false)
+      setSelectedBooking(null)
+      setShowRatingConfirmation(true)
+
+      setTimeout(() => {
+        setShowRatingConfirmation(false)
+      }, 4500)
+    } catch (error) {
+      console.error("Error submitting review:", error)
+    }
   }
 
   const handleCancelBooking = (booking) => {
