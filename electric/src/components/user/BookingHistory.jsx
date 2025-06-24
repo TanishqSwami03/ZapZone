@@ -36,6 +36,14 @@ const BookingHistory = () => {
           id: doc.id,
           ...doc.data()
         }))
+
+        // 🔥 Sort by createdAt timestamp, newest first
+        data.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis?.() || 0
+          const bTime = b.createdAt?.toMillis?.() || 0
+          return bTime - aTime
+        })
+
         setBookings(data)
       })
 
@@ -105,6 +113,12 @@ const BookingHistory = () => {
           } else if (updated[bookingId] === 0) {
             // Timer finished, update booking status to completed
             updateBooking(bookingId, { status: "completed" })
+
+            const completedBooking = bookings.find(b => b.id === bookingId)
+            if (completedBooking?.stationId) {
+              incrementVacantCharger(completedBooking.stationId)
+            }
+
             delete updated[bookingId]
             hasChanges = true
           }
@@ -172,6 +186,21 @@ const BookingHistory = () => {
         return "text-red-400 bg-red-400/10 border-red-400/20"
       default:
         return "text-gray-400 bg-gray-400/10 border-gray-400/20"
+    }
+  }
+
+  const getBorderColor = (status) => {
+    switch(status) {
+      case "completed":
+        return "#05df72"
+      case "confirmed":
+        return "#51a2ff"
+      case "charging":
+        return "#fdc700"
+      case "cancelled":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
     }
   }
 
@@ -254,10 +283,54 @@ const BookingHistory = () => {
     setShowCancelModal(true)
   }
 
-  const handleConfirmCancel = () => {
-    updateBooking(selectedBooking.id, { status: "cancelled" })
-    setShowCancelModal(false)
-    setSelectedBooking(null)
+  const handleConfirmCancel = async () => {
+    try {
+      const booking = selectedBooking
+      if (!booking) return
+
+      // 1. Update booking status
+      await updateBooking(booking.id, { status: "cancelled" })
+
+      // 2. Refund money to user's wallet
+      const userRef = doc(db, "users", booking.userId)
+      const userSnap = await getDoc(userRef)
+      if (userSnap.exists()) {
+        const userData = userSnap.data()
+        const currentWallet = userData?.wallet || 0
+        const currentBookings = userData?.bookings || 0
+        const currentSpendings = userData?.expenditure || 0
+        const currentChargingHours = userData?.chargingHours || 0
+
+        await updateDoc(userRef, {
+          wallet: currentWallet + booking.cost,
+          bookings: Math.max(currentBookings - 1, 0),
+          expenditure: Math.max(currentSpendings - booking.cost, 0),
+          chargingHours: Math.max(currentChargingHours - booking.duration, 0),
+        })
+      }
+
+      // 3. Deduct money from station's revenue
+      const stationRef = doc(db, "stations", booking.stationId)
+      const stationSnap = await getDoc(stationRef)
+      if (stationSnap.exists()) {
+        const stationData = stationSnap.data()
+        const currentRevenue = stationData?.revenue || 0
+        const completedBookings = stationData?.completedBookings || 0
+        const currentVacant = stationData?.vacantChargers || 0
+
+        await updateDoc(stationRef, {
+          revenue: Math.max(currentRevenue - booking.cost, 0),
+          completedBookings: Math.max(completedBookings - 1, 0),
+          vacantChargers: currentVacant + 1,
+        })
+      }
+
+      // 4. Close modal and reset state
+      setShowCancelModal(false)
+      setSelectedBooking(null)
+    } catch (error) {
+      console.error("Error cancelling booking:", error)
+    }
   }
 
   return (
@@ -292,7 +365,7 @@ const BookingHistory = () => {
           placeholder="Search your bookings..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full sm:max-w-xs px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-400 transition"
+          className="w-full sm:max-w-xs px-4 py-2 bg-gray-900 border border-gray-700 text-white rounded-lg placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-400 transition"
         />
       </div>
 
@@ -302,11 +375,13 @@ const BookingHistory = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
           className="bg-gray-800 border border-gray-700 rounded-xl p-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Total Bookings</p>
+              <p className="text-gray-400 text-sm">Completed Bookings</p>
               <p className="text-2xl font-bold text-white">{userStats?.bookings ?? 0}</p>
             </div>
             <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
@@ -319,7 +394,8 @@ const BookingHistory = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
           className="bg-gray-800 border border-gray-700 rounded-xl p-6"
         >
           <div className="flex items-center justify-between">
@@ -339,7 +415,8 @@ const BookingHistory = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#c27aff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
           className="bg-gray-800 border border-gray-700 rounded-xl p-6"
         >
           <div className="flex items-center justify-between">
@@ -360,23 +437,6 @@ const BookingHistory = () => {
           </div>
         </motion.div>
 
-        {/* Active Sessions */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Active Sessions</p>
-              <p className="text-2xl font-bold text-white">{bookings.filter((b) => b.status === "charging").length}</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
-              <Zap className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-        </motion.div> */}
       </div>
 
       {/* Bookings List */}
@@ -391,7 +451,8 @@ const BookingHistory = () => {
               key={booking.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "2px", boxShadow: "0 0 8px 2px rgba(59, 130, 246, 0.5)" }}
+              transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
               className="relative bg-gray-900 rounded-2xl border border-gray-700 p-5 shadow-lg hover:shadow-xl transition-all"
             >
               {/* Status badge */}

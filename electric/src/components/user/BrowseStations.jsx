@@ -59,7 +59,7 @@ const BrowseStations = () => {
           placeholder="Search stations by name or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
+          className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
         />
       </div>
 
@@ -75,8 +75,9 @@ const BrowseStations = () => {
             key={station.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300 group flex flex-col"
+            whileHover={{scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "1px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"}}
+            transition={{ delay: index * 0.1, type: "ease-out", stiffness: 300 }}
+            className="bg-gray-900 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300 group flex flex-col"
           >
             {/* Station Header */}
             <div className="flex items-start justify-between mb-4">
@@ -91,7 +92,7 @@ const BrowseStations = () => {
               </div>
               <div className="flex items-center text-yellow-400">
                 <Star className="w-4 h-4 mr-1 fill-current" />
-                <span className="text-sm font-medium">{station.rating}</span>
+                <span className="text-sm font-medium">{station.rating.toFixed(1)}</span>
                 {/* <span className="text-gray-400 text-xs ml-1">({station.reviews})</span> */}
               </div>
             </div>
@@ -121,7 +122,7 @@ const BrowseStations = () => {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleBookStation(station)}
-              className="mt-auto w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300"
+              className="mt-auto ml-auto w-1/2 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300"
             >
               Book Now
             </motion.button>
