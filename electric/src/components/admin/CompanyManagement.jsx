@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Building2, Search, MoreHorizontal, Ban, CheckCircle, Mail, Phone, MapPin, Calendar } from "lucide-react"
+import {
+  Building2, Search, Ban, CheckCircle, Mail, Phone, Calendar
+} from "lucide-react"
 import ConfirmModal from "../modals/ConfirmModal"
 import CompanyActionsModal from "../modals/CompanyActionsModal"
 import { collection, onSnapshot, updateDoc, doc, query, where, getDocs } from "firebase/firestore"
@@ -26,14 +28,64 @@ const CompanyManagement = () => {
       }))
       setCompanies(companyData)
     })
-
     return () => unsub()
   }, [])
+
+  useEffect(() => {
+    const fetchAdditionalStats = async () => {
+      try {
+        const stationsSnapshot = await getDocs(collection(db, "stations"))
+        const allStations = stationsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+        // Create a company stats map
+        const statsMap = {}
+
+        for (const company of companies) {
+          const companyStations = allStations.filter(
+            (station) => station.companyId === company.id
+          )
+
+          const stationCount = companyStations.length
+          const totalRevenue = companyStations.reduce(
+            (sum, station) => sum + (station.revenue || 0), 0
+          )
+
+          const ratings = companyStations.map(s => s.rating).filter(Boolean)
+          const avgRating =
+            ratings.length > 0
+              ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2)
+              : "N/A"
+
+          statsMap[company.id] = {
+            avgRating,
+            stationCount,
+            totalRevenue,
+          }
+        }
+
+        // Merge back into companies state
+        const enrichedCompanies = companies.map(company => ({
+          ...company,
+          ...statsMap[company.id],
+        }))
+
+        setCompanies(enrichedCompanies)
+      } catch (error) {
+        console.error("Error fetching additional stats:", error)
+      }
+    }
+
+    if (companies.length > 0) {
+      fetchAdditionalStats()
+    }
+  }, [companies])
 
   const statusOptions = [
     { value: "", label: "All Statuses" },
     { value: "active", label: "Active" },
-    { value: "pending", label: "Pending" },
     { value: "suspended", label: "Suspended" },
   ]
 
@@ -59,9 +111,15 @@ const CompanyManagement = () => {
     }
   }
 
-  const handleActionsClick = (company) => {
-    setSelectedCompany(company)
-    setShowActionsModal(true)
+  const getBorderColor = (status) => {
+    switch (status) {
+      case "active":
+        return "#05df72"
+      case "suspended":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
+    }
   }
 
   const handleSuspend = (company) => {
@@ -74,97 +132,54 @@ const CompanyManagement = () => {
     setShowActivateModal(true)
   }
 
-  const handleEdit = () => {
-    setShowActionsModal(false)
-    // Add edit logic here
-    console.log("Edit company:", selectedCompany)
-  }
-
-  const handleViewStations = () => {
-    setShowActionsModal(false)
-    // Add view stations logic here
-    console.log("View stations for:", selectedCompany)
-  }
-
-  const handleSuspendFromModal = () => {
-    setShowActionsModal(false)
-    setShowSuspendModal(true)
-  }
-
-  const handleActivateFromModal = () => {
-    setShowActionsModal(false)
-    setShowActivateModal(true)
-  }
-
-  const handleDelete = () => {
-    setShowActionsModal(false)
-    // Add delete logic here
-    console.log("Delete company:", selectedCompany)
-  }
-
   const confirmSuspend = async () => {
     try {
-      // 1. Suspend the company
       await updateDoc(doc(db, "companies", selectedCompany.id), {
         status: "suspended",
       })
-
-      // 2. Get all stations owned by this company
       const stationsQuery = query(
         collection(db, "stations"),
         where("companyId", "==", selectedCompany.id)
       )
       const querySnapshot = await getDocs(stationsQuery)
-
-      // 3. Update each station's status to "suspended"
       const updates = querySnapshot.docs.map((docSnap) =>
         updateDoc(doc(db, "stations", docSnap.id), {
           status: "suspended",
         })
       )
       await Promise.all(updates)
-
-      // 4. Close modal and clear selection
       setShowSuspendModal(false)
       setSelectedCompany(null)
     } catch (error) {
-      console.error("Error suspending company and stations:", error)
+      console.error("Error suspending company:", error)
     }
   }
 
   const confirmActivate = async () => {
     try {
-      // 1. Activate the company
       await updateDoc(doc(db, "companies", selectedCompany.id), {
         status: "active",
       })
-
-      // 2. Get all stations owned by this company
       const stationsQuery = query(
         collection(db, "stations"),
         where("companyId", "==", selectedCompany.id)
       )
       const querySnapshot = await getDocs(stationsQuery)
-
-      // 3. Update each station's status to "active"
       const updates = querySnapshot.docs.map((docSnap) =>
         updateDoc(doc(db, "stations", docSnap.id), {
           status: "active",
         })
       )
       await Promise.all(updates)
-
-      // 4. Close modal and clear selection
       setShowActivateModal(false)
       setSelectedCompany(null)
     } catch (error) {
-      console.error("Error activating company and stations:", error)
+      console.error("Error activating company:", error)
     }
   }
 
   const totalCompanies = companies.length
   const activeCompanies = companies.filter((c) => c.status === "active").length
-  const pendingCompanies = companies.filter((c) => c.status === "pending").length
   const suspendedCompanies = companies.filter((c) => c.status === "suspended").length
 
   return (
@@ -177,232 +192,221 @@ const CompanyManagement = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Total Companies */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#3B82F6",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Total Companies</p>
               <p className="text-2xl font-bold text-white">{totalCompanies}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-400/10">
               <Building2 className="w-6 h-6 text-blue-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Active */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#10B981",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Active</p>
               <p className="text-2xl font-bold text-white">{activeCompanies}</p>
             </div>
-            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-green-400/10">
               <CheckCircle className="w-6 h-6 text-green-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Suspended */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Pending</p>
-              <p className="text-2xl font-bold text-white">{pendingCompanies}</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#EF4444",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Suspended</p>
               <p className="text-2xl font-bold text-white">{suspendedCompanies}</p>
             </div>
-            <div className="w-12 h-12 bg-red-400/10 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-red-400/10">
               <Ban className="w-6 h-6 text-red-400" />
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+      {/* Search + Filter */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full md:w-1/2"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative">
+          
+          {/* Animated Search Input */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 250 }}
+            className="relative"
+          >
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search companies..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
             />
-          </div>
+          </motion.div>
 
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+          {/* Animated Filter Dropdown */}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 250 }}
           >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Companies List */}
-      <div className="space-y-4">
+      {/* Company List */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 py-3">
         {filteredCompanies.map((company, index) => (
           <motion.div
             key={company.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="relative bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{
+              scale: 1.05,
+              y: -2,
+              borderColor: getBorderColor(company.status),
+              borderWidth: "3px",
+            }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
           >
-            {/* Status badge - top-right */}
-            <div
-              className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm border ${getStatusColor(company.status)}`}
-            >
-              {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
+                  <Building2 className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1">{company.name}</h3>
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <Mail className="w-4 h-4 mr-1" />
+                    {company.email}
+                  </div>
+                </div>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(company.status)}`}>
+                {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
+              </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                {/* Header: Icon + name + email */}
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
-                    <Building2 className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">{company.name}</h3>
-                    <div className="flex items-center text-gray-400 text-sm">
-                      <Mail className="w-4 h-4 mr-1" />
-                      {company.email}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Info grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  {/* Contact Person */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Contact Person</p>
-                    <p className="text-white font-medium">{company.contactPerson}</p>
-                  </div>
-                  {/* Phone */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Phone</p>
-                    <div className="flex items-center text-sm">
-                      <Phone className="w-3 h-3 mr-1 text-gray-400" />
-                      <span className="text-white ml-1">{company.phone}</span>
-                    </div>
-                  </div>
-                  {/* Join Date */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Join Date</p>
-                    <p className="text-white font-medium">
-                      {new Date(company.joinDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                  {/* Last Active */}
-                  {/* <div>
-                    <p className="text-xs text-gray-400 mb-1">Last Active</p>
-                    <p className="text-white font-medium">
-                      {new Date(company.lastActive).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div> */}
-                </div>
-
-                {/* Rating, Stations, Revenue */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Avg Rating */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Avg. Rating</p>
-                    <p className="text-white font-medium">{company.avgRating}</p>
-                  </div>
-                  {/* Tatal Stations */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Stations</p>
-                    <p className="text-white font-medium">{company.stationCount}</p>
-                  </div>
-                  {/* Total Earnings */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Total Revenue</p>
-                    <p className="text-green-400 font-medium">₹ {company.totalRevenue}</p>
-                  </div>
-                </div>
-
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Contact Person</p>
+                <p className="text-sm font-bold text-white">{company.contactPerson}</p>
               </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Phone</p>
+                <p className="text-sm font-bold text-white">{company.phone}</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Join Date</p>
+                <p className="text-sm font-bold text-white">
+                  {new Date(company.joinDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}
+                </p>
+              </div>
+            </div>
 
-              {/* Actions */}
-              <div className="mt-4 lg:mt-0 lg:ml-6 flex space-x-2">
-                {/* <motion.button
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Avg. Rating</p>
+                <p className="text-sm font-bold text-white">{company.avgRating}</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Stations</p>
+                <p className="text-sm font-bold text-white">{company.stationCount}</p>
+              </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Total Revenue</p>
+                <p className="text-sm font-bold text-green-400">₹ {company.totalRevenue}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {company.status === "active" && (
+                <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleActionsClick(company)}
-                  className="flex items-center px-3 py-2 bg-purple-400/10 text-purple-400 border border-purple-400/20 rounded-lg hover:bg-purple-400/20 transition-all duration-200"
+                  onClick={() => handleSuspend(company)}
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
                 >
-                  <MoreHorizontal className="w-4 h-4" />
-                </motion.button> */}
-
-                {company.status === "active" && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSuspend(company)}
-                    className="flex items-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
-                  >
-                    <Ban className="w-4 h-4 mr-1" />
-                    Suspend
-                  </motion.button>
-                )}
-
-                {company.status === "suspended" && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleActivate(company)}
-                    className="flex items-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Activate
-                  </motion.button>
-                )}
-              </div>
+                  <Ban className="w-4 h-4 mr-1" />
+                  Suspend
+                </motion.button>
+              )}
+              {company.status === "suspended" && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleActivate(company)}
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
+                >
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Activate
+                </motion.button>
+              )}
             </div>
           </motion.div>
         ))}
@@ -422,11 +426,17 @@ const CompanyManagement = () => {
         isOpen={showActionsModal}
         onClose={() => setShowActionsModal(false)}
         company={selectedCompany}
-        onEdit={handleEdit}
-        onViewStations={handleViewStations}
-        onSuspend={handleSuspendFromModal}
-        onActivate={handleActivateFromModal}
-        onDelete={handleDelete}
+        onEdit={() => setShowActionsModal(false)}
+        onViewStations={() => setShowActionsModal(false)}
+        onSuspend={() => {
+          setShowActionsModal(false)
+          setShowSuspendModal(true)
+        }}
+        onActivate={() => {
+          setShowActionsModal(false)
+          setShowActivateModal(true)
+        }}
+        onDelete={() => setShowActionsModal(false)}
       />
 
       <ConfirmModal

@@ -97,6 +97,17 @@ const UserManagement = () => {
     setSelectedUser(null)
   }
 
+  const getBorderColor = (status) => {
+    switch(status) {
+      case "active":
+        return "#05df72"
+      case "suspended":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
+    }
+  }
+
   const totalUsers = users.length
   const activeUsers = users.filter((u) => u.status === "active").length
   const suspendedUsers = users.filter((u) => u.status === "suspended").length
@@ -112,11 +123,20 @@ const UserManagement = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        {/* Total Users */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#3B82F6",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -129,11 +149,18 @@ const UserManagement = () => {
           </div>
         </motion.div>
 
+        {/* Active Users */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#10B981",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -146,11 +173,18 @@ const UserManagement = () => {
           </div>
         </motion.div>
 
+        {/* Suspended */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#ff6467",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -165,172 +199,157 @@ const UserManagement = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
+        className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full md:w-1/2"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative">
+          {/* Search */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="relative"
+          >
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
             />
-          </div>
+          </motion.div>
 
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+          {/* Filter */}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25, type: "spring", stiffness: 200 }}
           >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 w-full bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Users List */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 py-3">
         {filteredUsers.map((user, index) => (
           <motion.div
             key={user.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="relative bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{
+              scale: 1.05,
+              y: -2,
+              borderColor: getBorderColor(user.status), // Assuming you have a similar helper
+              borderWidth: "3px",
+            }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
           >
-            {/* Status */}
-            <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm border ${getStatusColor(user.status)}`}>
-              {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+            {/* Header: Name + Status */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
+                  <User className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1">{user.name}</h3>
+                  <div className="flex items-center text-gray-400 text-sm">
+                    <Mail className="w-4 h-4 mr-1" />
+                    {user.email}
+                  </div>
+                </div>
+              </div>
+              <div
+                className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(user.status)}`}
+              >
+                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+              </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                {/* Avatar, Name, Email */}
-                <div className="flex items-center mb-4">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
-                    <User className="w-6 h-6 text-purple-400" />
-                  </div>
-                  {/* Name, Email */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">{user.name}</h3>
-                    <div className="flex items-center text-gray-400 text-sm">
-                      <Mail className="w-4 h-4 mr-1" />
-                      {user.email}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Phone, Join Date, Last Active, Total Bookings */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  {/* Phone */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Phone</p>
-                    <div className="flex items-center text-sm">
-                      <Phone className="w-3 h-3 mr-1 text-gray-400" />
-                      <span className="text-white">{user.phone}</span>
-                    </div>
-                  </div>
-                  {/* Join Date */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Join Date</p>
-                    <p className="text-white font-medium">
-                      {new Date(user.joinDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                  {/* Last Active */}
-                  {/* <div>
-                    <p className="text-xs text-gray-400 mb-1">Last Active</p>
-                    <p className="text-white font-medium">
-                      {new Date(user.lastDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div> */}
-                  {/* Total Bookings */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Bookings</p>
-                    <p className="text-white font-medium">{user.bookings}</p>
-                  </div>
-                </div>
-
-                {/* Address, Charging Hourse, Rating, Total Spent */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* Address */}
-                  {/* <div>
-                    <p className="text-xs text-gray-400 mb-1">Address</p>
-                    <p className=" font-medium">{user.address}</p>
-                  </div> */}
-                  {/* Charging Hours */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Charging Hours</p>
-                    <p className="text-white font-medium">{user.chargingHours}</p>
-                  </div>
-                  {/* Rating */}
-                  {/* <div>
-                    <p className="text-xs text-gray-400 mb-1">Rating (out of 5)</p>
-                    <p className=" font-medium">{user.rating}</p>
-                  </div> */}
-                  {/* Total Spent */}
-                  <div>
-                    <p className="text-xs text-gray-400 mb-1">Total Spent</p>
-                    <p className="text-green-400 font-medium">₹ {user.expenditure}</p>
-                  </div>
-                </div>
-
+            {/* Info Grid 1: Phone, Join Date, Bookings */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Phone</p>
+                <p className="text-sm font-bold text-white">{user.phone}</p>
               </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Join Date</p>
+                <p className="text-sm font-bold text-white">
+                  {new Date(user.joinDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Bookings</p>
+                <p className="text-sm font-bold text-white">{user.bookings}</p>
+              </div>
+            </div>
 
-              {/* Actions */}
-              <div className="mt-4 lg:mt-0 lg:ml-6 flex space-x-2">
-                {/* <motion.button
+            {/* Info Grid 2: Charging Hours, Total Spent */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Charging Hours</p>
+                <p className="text-sm font-bold text-white">
+                  {(() => {
+                    const totalMin = user?.chargingHours ?? 0;
+                    const hours = Math.floor(totalMin / 60);
+                    const minutes = totalMin % 60;
+                    return `${hours > 0 ? `${hours} h ` : ""}${minutes} min`;
+                  })()}
+                </p>
+              </div>
+              <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Total Spent</p>
+                <p className="text-sm font-bold text-green-400">₹ {user.expenditure}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              {user.status === "active" && (
+                <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleUserActions(user)}
-                  className="flex items-center px-3 py-2 bg-purple-400/10 text-purple-400 border border-purple-400/20 rounded-lg hover:bg-purple-400/20 transition-all duration-200"
+                  onClick={() => handleSuspend(user)}
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
                 >
-                  <MoreHorizontal className="w-4 h-4" />
-                </motion.button> */}
-
-                {user.status === "active" && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSuspend(user)}
-                    className="flex items-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
-                  >
-                    <Ban className="w-4 h-4 mr-1" />
-                    Suspend
-                  </motion.button>
-                )}
-
-                {user.status === "suspended" && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleActivate(user)}
-                    className="flex items-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Activate
-                  </motion.button>
-                )}
-              </div>
-
+                  <Ban className="w-4 h-4 mr-1" />
+                  Suspend
+                </motion.button>
+              )}
+              {user.status === "suspended" && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleActivate(user)}
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
+                >
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Activate
+                </motion.button>
+              )}
             </div>
           </motion.div>
         ))}
       </div>
-
 
       {/* No Users */}
       {filteredUsers.length === 0 && (

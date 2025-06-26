@@ -1,72 +1,87 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { BarChart3, TrendingUp, DollarSign, Users, Building2, Zap, Download, Calendar } from "lucide-react"
+import {
+  TrendingUp, DollarSign, Users, Building2, Zap, Download, Calendar,
+  IndianRupee
+} from "lucide-react"
+import { collection, getDocs } from "firebase/firestore"
+import { db } from "../../firebase/firebaseConfig"
 
 const Reports = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("month")
-  const [selectedMetric, setSelectedMetric] = useState("revenue")
+
+  const [platformStats, setPlatformStats] = useState({
+    totalRevenue: 0,
+    platformCommission: 0,
+    totalBookings: 0,
+    activeUsers: 0,
+    activeStations: 0,
+    averageBookingValue: 0
+  })
+
+  const [topStations, setTopStations] = useState([])
 
   const periodOptions = [
     { value: "week", label: "This Week" },
     { value: "month", label: "This Month" },
     { value: "quarter", label: "This Quarter" },
-    { value: "year", label: "This Year" },
+    { value: "year", label: "This Year" }
   ]
 
-  const metricOptions = [
-    { value: "revenue", label: "Revenue" },
-    { value: "bookings", label: "Bookings" },
-    { value: "users", label: "User Growth" },
-    { value: "stations", label: "Station Growth" },
-  ]
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [stationSnap, bookingSnap, userSnap] = await Promise.all([
+          getDocs(collection(db, "stations")),
+          getDocs(collection(db, "bookings")),
+          getDocs(collection(db, "users"))
+        ])
 
-  // Mock analytics data
-  const platformStats = {
-    totalRevenue: 45680.5,
-    platformCommission: 6852.08,
-    totalBookings: 1247,
-    activeUsers: 892,
-    activeStations: 156,
-    averageBookingValue: 36.64,
-  }
+        const stations = stationSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        const bookings = bookingSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        const users = userSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
 
-  const monthlyData = [
-    { month: "Jan", revenue: 3200, bookings: 89, users: 45, stations: 12 },
-    { month: "Feb", revenue: 4100, bookings: 112, users: 67, stations: 18 },
-    { month: "Mar", revenue: 3800, bookings: 98, users: 52, stations: 15 },
-    { month: "Apr", revenue: 4500, bookings: 125, users: 78, stations: 22 },
-    { month: "May", revenue: 5200, bookings: 142, users: 89, stations: 28 },
-    { month: "Jun", revenue: 6100, bookings: 168, users: 94, stations: 35 },
-  ]
+        const totalRevenue = bookings.reduce((sum, b) => sum + (b.cost || 0), 0)
+        const totalBookings = bookings.length
+        const platformCommission = totalRevenue * 0.10
+        const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0
+        const activeUsers = users.filter(u => u.status === "active").length
+        const activeStations = stations.filter(s => s.status === "active").length
 
-  const topStations = [
-    { name: "Tesla Supercharger Downtown", revenue: 2340, bookings: 89, rating: 4.8 },
-    { name: "EV Hub Mall Plaza", revenue: 1890, bookings: 67, rating: 4.5 },
-    { name: "GreenCharge Highway Stop", revenue: 1650, bookings: 54, rating: 4.2 },
-    { name: "PowerPoint City Center", revenue: 1420, bookings: 48, rating: 4.6 },
-    { name: "ElectroStation Park", revenue: 1280, bookings: 42, rating: 4.4 },
-  ]
+        const statsMap = {}
+        stations.forEach(s => {
+          statsMap[s.id] = {
+            name: s.name,
+            revenue: s.revenue || 0,
+            bookings: s.completedBookings || 0,
+            rating: s.rating || 0
+          }
+        })
 
-  const userGrowth = {
-    newUsers: 94,
-    newCompanies: 8,
-    churnRate: 2.3,
-    retentionRate: 87.5,
-  }
+        const stationsList = Object.values(statsMap)
+        const sortedStations = stationsList
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5)
 
-  const getChartData = () => {
-    return monthlyData.map((data) => ({
-      ...data,
-      value: data[selectedMetric],
-    }))
-  }
+        setPlatformStats({
+          totalRevenue,
+          platformCommission,
+          totalBookings,
+          activeUsers,
+          activeStations,
+          averageBookingValue: Number(averageBookingValue.toFixed(2))
+        })
 
-  const getMaxValue = () => {
-    const data = getChartData()
-    return Math.max(...data.map((d) => d.value))
-  }
+        setTopStations(sortedStations)
+      } catch (err) {
+        console.error("Error loading analytics", err)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -76,7 +91,6 @@ const Reports = () => {
           <h1 className="text-2xl font-bold text-white mb-2">Analytics & Reports</h1>
           <p className="text-gray-400">Platform performance and business insights</p>
         </div>
-
         <div className="mt-4 sm:mt-0 flex space-x-2">
           <select
             value={selectedPeriod}
@@ -89,7 +103,6 @@ const Reports = () => {
               </option>
             ))}
           </select>
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -101,241 +114,173 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        {/* Total Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Total Revenue</p>
-              <p className="text-xl font-bold text-white">${platformStats.totalRevenue.toLocaleString()}</p>
-              <p className="text-green-400 text-sm mt-1">+15.3%</p>
+              <p className="text-2xl font-bold text-white">₹ {platformStats.totalRevenue.toLocaleString()}</p>
             </div>
-            <div className="w-10 h-10 bg-green-400/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-green-400" />
+            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
+              <IndianRupee className="w-6 h-6 text-green-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Commission */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#3B82F6", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Commission</p>
-              <p className="text-xl font-bold text-white">${platformStats.platformCommission.toLocaleString()}</p>
-              <p className="text-blue-400 text-sm mt-1">15% of revenue</p>
+              <p className="text-2xl font-bold text-white">₹ {platformStats.platformCommission.toLocaleString()}</p>
             </div>
-            <div className="w-10 h-10 bg-blue-400/10 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-blue-400" />
+            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-blue-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Total Bookings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#A855F7", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Total Bookings</p>
-              <p className="text-xl font-bold text-white">{platformStats.totalBookings.toLocaleString()}</p>
-              <p className="text-purple-400 text-sm mt-1">+8.7%</p>
+              <p className="text-2xl font-bold text-white">{platformStats.totalBookings}</p>
             </div>
-            <div className="w-10 h-10 bg-purple-400/10 rounded-lg flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-purple-400" />
+            <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-purple-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Active Users */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#FACC15", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Active Users</p>
-              <p className="text-xl font-bold text-white">{platformStats.activeUsers}</p>
-              <p className="text-green-400 text-sm mt-1">+12.1%</p>
+              <p className="text-2xl font-bold text-white">{platformStats.activeUsers}</p>
             </div>
-            <div className="w-10 h-10 bg-yellow-400/10 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-yellow-400" />
+            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-yellow-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Active Stations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#FB923C", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Active Stations</p>
-              <p className="text-xl font-bold text-white">{platformStats.activeStations}</p>
-              <p className="text-blue-400 text-sm mt-1">+18.9%</p>
+              <p className="text-2xl font-bold text-white">{platformStats.activeStations}</p>
             </div>
-            <div className="w-10 h-10 bg-orange-400/10 rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-orange-400" />
+            <div className="w-12 h-12 bg-orange-400/10 rounded-lg flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-orange-400" />
             </div>
           </div>
         </motion.div>
 
+        {/* Avg. Booking */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#EC4899", borderWidth: "3px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Avg. Booking</p>
-              <p className="text-xl font-bold text-white">${platformStats.averageBookingValue}</p>
-              <p className="text-green-400 text-sm mt-1">+5.2%</p>
+              <p className="text-2xl font-bold text-white">₹ {platformStats.averageBookingValue}</p>
             </div>
-            <div className="w-10 h-10 bg-pink-400/10 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-pink-400" />
+            <div className="w-12 h-12 bg-pink-400/10 rounded-lg flex items-center justify-center">
+              <Zap className="w-6 h-6 text-pink-400" />
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Trend Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">Performance Trends</h2>
-            <select
-              value={selectedMetric}
-              onChange={(e) => setSelectedMetric(e.target.value)}
-              className="px-3 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-purple-400"
-            >
-              {metricOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="h-64 flex items-end justify-between space-x-2">
-            {getChartData().map((data, index) => (
-              <div key={data.month} className="flex-1 flex flex-col items-center">
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(data.value / getMaxValue()) * 100}%` }}
-                  transition={{ delay: index * 0.1 }}
-                  className="w-full bg-gradient-to-t from-purple-400 to-blue-400 rounded-t mb-2"
-                />
-                <span className="text-gray-400 text-xs">{data.month}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Top Stations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <h2 className="text-lg font-semibold text-white mb-6">Top Performing Stations</h2>
-
-          <div className="space-y-4">
-            {topStations.map((station, index) => (
-              <motion.div
-                key={station.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center justify-between p-3 bg-gray-700 rounded-lg"
-              >
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-purple-400/10 rounded-lg flex items-center justify-center mr-3">
-                    <span className="text-purple-400 font-bold text-sm">{index + 1}</span>
-                  </div>
-                  <div>
-                    <h3 className="text-white font-medium text-sm">{station.name}</h3>
-                    <p className="text-gray-400 text-xs">
-                      {station.bookings} bookings • ⭐ {station.rating}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-white font-medium">${station.revenue}</p>
-                  <p className="text-gray-400 text-xs">Revenue</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* User Growth & Retention */}
+      {/* Top Stations */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+        whileHover={{
+          scale: 1.02,
+          y: -2,
+          borderColor: "#c084fc",
+          borderWidth: "1.5px"
+        }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
       >
-        <h2 className="text-lg font-semibold text-white mb-6">User Growth & Retention</h2>
+        <h2 className="text-xl font-semibold text-white mb-6">🏆 Top Performing Stations</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-400/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Users className="w-8 h-8 text-green-400" />
-            </div>
-            <p className="text-2xl font-bold text-white">{userGrowth.newUsers}</p>
-            <p className="text-gray-400 text-sm">New Users</p>
-            <p className="text-green-400 text-xs mt-1">This month</p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-400/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Building2 className="w-8 h-8 text-blue-400" />
-            </div>
-            <p className="text-2xl font-bold text-white">{userGrowth.newCompanies}</p>
-            <p className="text-gray-400 text-sm">New Companies</p>
-            <p className="text-blue-400 text-xs mt-1">This month</p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-400/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <TrendingUp className="w-8 h-8 text-red-400" />
-            </div>
-            <p className="text-2xl font-bold text-white">{userGrowth.churnRate}%</p>
-            <p className="text-gray-400 text-sm">Churn Rate</p>
-            <p className="text-red-400 text-xs mt-1">Monthly</p>
-          </div>
-
-          <div className="text-center">
-            <div className="w-16 h-16 bg-purple-400/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <BarChart3 className="w-8 h-8 text-purple-400" />
-            </div>
-            <p className="text-2xl font-bold text-white">{userGrowth.retentionRate}%</p>
-            <p className="text-gray-400 text-sm">Retention Rate</p>
-            <p className="text-purple-400 text-xs mt-1">90-day</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {topStations.map((station, index) => (
+            <motion.div
+              key={station.name}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.08 }}
+              className="flex items-center justify-between p-5 bg-gray-900/50 border border-gray-700 rounded-xl hover:shadow-xl hover:border-purple-400/30 transition duration-200"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 border border-purple-400/20 flex items-center justify-center font-bold">
+                  {index + 1}
+                </div>
+                <div>
+                  <h3 className="text-white font-medium text-sm">{station.name}</h3>
+                  <div className="flex gap-2 mt-1">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-300">
+                      📦 {station.bookings} bookings
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-yellow-300">
+                      ⭐ {station.rating}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-white font-semibold text-sm">₹{station.revenue.toLocaleString()}</p>
+                <p className="text-gray-400 text-xs">Revenue</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </motion.div>
+
     </div>
   )
 }

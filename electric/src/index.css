@@ -75,12 +75,12 @@
 }
 
 /* Focus styles */
-input:focus,
+/* input:focus,
 select:focus,
 textarea:focus {
   outline: 2px solid #10b981;
   outline-offset: 2px;
-}
+} */
 
 /* Button hover effects */
 button:disabled {
