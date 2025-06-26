@@ -1,9 +1,20 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { DollarSign, TrendingUp, Calendar, PieChart, Building2 } from "lucide-react"
+import {
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  PieChart,
+  Building2,
+  MapPin,
+  CheckCircle,
+  AlertCircle
+} from "lucide-react"
+
 import {
   collection,
-  doc,
   onSnapshot,
   query,
   where
@@ -12,55 +23,98 @@ import { db, auth } from "../../firebase/firebaseConfig"
 
 const Earnings = () => {
   const [currentUser, setCurrentUser] = useState(null)
-  const [company, setCompany] = useState(null)
   const [stations, setStations] = useState([])
+  const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user)
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) setCurrentUser(user)
     })
-    return () => unsubscribeAuth()
+    return () => unsubscribe()
   }, [])
 
   useEffect(() => {
     if (!currentUser) return
-
-    const companyRef = doc(db, "companies", currentUser.uid)
-    const unsubscribeCompany = onSnapshot(companyRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setCompany(docSnap.data())
-      }
-    })
-
-    const stationsRef = collection(db, "stations")
-    const q = query(stationsRef, where("companyId", "==", currentUser.uid))
-    const unsubscribeStations = onSnapshot(q, (querySnapshot) => {
-      const stationList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+    const q = query(collection(db, "stations"), where("companyId", "==", currentUser.uid))
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const stationList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       setStations(stationList)
-      setLoading(false)
     })
-
-    return () => {
-      unsubscribeCompany()
-      unsubscribeStations()
-    }
+    return () => unsubscribe()
   }, [currentUser])
 
-  if (loading) return <p className="text-white">Loading...</p>
-  if (!company) return <p className="text-red-500">Company data not found.</p>
+  useEffect(() => {
+    if (!currentUser) return
+    const unsubscribe = onSnapshot(collection(db, "bookings"), (snapshot) => {
+      const all = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      setBookings(all)
+      setLoading(false)
+    })
+    return () => unsubscribe()
+  }, [currentUser])
 
-  const totalRevenue = company.totalRevenue || 0
+  if (loading || !currentUser) return <p className="text-white">Loading...</p>
+
+  const companyStationIds = stations.map(s => s.id)
+  const completedBookings = bookings.filter(
+    (b) => companyStationIds.includes(b.stationId) && b.status === "completed"
+  )
+
+  const totalRevenue = completedBookings.reduce((sum, b) => sum + (b.cost || 0), 0)
+  const totalBookings = completedBookings.length
   const platformCommission = totalRevenue * 0.1
   const netEarnings = totalRevenue - platformCommission
-  const totalBookings = stations.reduce((sum, s) => sum + (s.completedBookings || 0), 0)
+  const avgPerBooking = totalBookings > 0 ? totalRevenue / totalBookings : 0
+
+  const stationStats = stations.map((station) => {
+    const stationBookings = completedBookings.filter((b) => b.stationId === station.id)
+    const revenue = stationBookings.reduce((sum, b) => sum + (b.cost || 0), 0)
+    const bookingCount = stationBookings.length
+    return {
+      ...station,
+      revenue,
+      completedBookings: bookingCount,
+      avgPerBooking: bookingCount > 0 ? revenue / bookingCount : 0
+    }
+  })
+
+  const getBorderColor = (status) => {
+    switch(status) {
+      case "active":
+        return "#05df72"
+      case "suspended":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "bg-green-500/10 text-green-400 border-green-500/30";
+      case "suspended":
+        return "bg-red-500/10 text-red-400 border-red-500/30";
+      default:
+        return "bg-gray-500/10 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "active":
+        return CheckCircle
+      case "suspended":
+        return AlertCircle
+      default:
+        return AlertCircle
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Stats: Company Level */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">Earnings Dashboard</h1>
@@ -68,68 +122,186 @@ const Earnings = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Total Revenue" icon={DollarSign} value={totalRevenue} color="green" />
-        <StatCard title="Platform Commission (10%)" icon={PieChart} value={platformCommission} color="red" />
-        <StatCard title="Net Earnings" icon={TrendingUp} value={netEarnings} color="blue" />
-        <StatCard
-          title="Avg. per Booking"
-          icon={Calendar}
-          value={totalBookings > 0 ? totalRevenue / totalBookings : 0}
-          color="purple"
-        />
+      {/* Earnings Summary Cards (Direct motion.div) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* Total Revenue */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#05df72",
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(5, 223, 114, 0.5)"
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Revenue</p>
+              <p className="text-2xl font-bold text-white mt-1">₹ {totalRevenue.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Platform Commission */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#F87171",
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(248, 113, 113, 0.5)"
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Platform Commission (10%)</p>
+              <p className="text-2xl font-bold text-white mt-1">₹ {platformCommission.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 bg-red-400/10 rounded-lg flex items-center justify-center">
+              <PieChart className="w-6 h-6 text-red-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Net Earnings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#3B82F6",
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Net Earnings</p>
+              <p className="text-2xl font-bold text-white mt-1">₹ {netEarnings.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-blue-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Avg. Per Booking */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#A855F7",
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(168, 85, 247, 0.5)"
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Avg. per Booking</p>
+              <p className="text-2xl font-bold text-white mt-1">₹ {avgPerBooking.toFixed(2)}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Station Performance: For All Stations */}
+      {/* Station Performance Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+        className="bg-gray-900 border border-gray-600 rounded-xl p-6"
       >
         <h2 className="text-lg font-semibold text-white mb-6">Station Performance</h2>
 
-        {stations.length === 0 ? (
+        {stationStats.length === 0 ? (
           <p className="text-gray-400">No stations registered yet.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stations
-              .sort((a, b) => b.revenue - a.revenue)
-              .map((station, i) => (
-                <motion.div
-                  key={station.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-gray-700 hover:bg-gray-600 transition-colors duration-200 rounded-xl p-5"
-                >
-                  {/* Top Section: Icon + Name + Address */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-10 h-10 bg-blue-400/10 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold text-base">{station.name}</h3>
-                      <p className="text-sm text-gray-400">{station.address}</p>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {stationStats.map((station, index) => (
+              <motion.div
+                key={station.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px", boxShadow: "0 0 8px 2px rgba(59, 130, 246, 0.5)" }}
+                transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
+                className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+              >
+                {/* Status Badge */}
+                <div className="absolute top-4 right-4">
+                  {(() => {
+                    const StatusIcon = getStatusIcon(station.status);
+                    return (
+                      <span className={`text-sm px-3 py-1 rounded-full flex items-center gap-1 ${getStatusColor(station.status)} border`}>
+                        <StatusIcon className="w-4 h-4" />
+                        {station.status.toUpperCase()}
+                      </span>
+                    );
+                  })()}
+                </div>
 
-                  {/* Bottom Section: Revenue | Bookings | Avg/Booking */}
-                  <div className="flex items-center justify-between gap-4">
-                    <StatMini title="Revenue" value={station.revenue || 0} isCurrency />
-                    <StatMini title="Bookings" value={station.completedBookings || 0} />
-                    <StatMini
-                      title="Avg/Booking"
-                      value={
-                        station.completedBookings > 0
-                          ? station.revenue / station.completedBookings
-                          : 0
-                      }
-                      isCurrency
-                    />
+                {/* Station Info */}
+                <div className="mb-4">
+                  <p className="text-gray-400 text-sm">Station</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Building2 className="w-4 h-4 text-blue-400" />
+                    <p className="text-white font-semibold">{station.name}</p>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <div>
+                    <p className="text-gray-400 mb-1">Address</p>
+                    <div className="flex items-center gap-1 text-white">
+                      <MapPin className="w-4 h-4 text-yellow-400" />
+                      <span>{station.address || "N/A"}, {station.city || "N/A"}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 mb-1">Completed Bookings</p>
+                    <div className="flex items-center gap-1 text-white">
+                      <Calendar className="w-4 h-4 text-blue-400" />
+                      <span>{station.completedBookings}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 mb-1">Revenue</p>
+                    <div className="flex items-center gap-1 text-green-400 font-medium">
+                      <DollarSign className="w-4 h-4" />
+                      ₹ {station.revenue.toFixed(2)}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 mb-1">Avg. per Booking</p>
+                    <div className="flex items-center gap-1 text-purple-400 font-medium">
+                      <PieChart className="w-4 h-4" />
+                      ₹ {station.avgPerBooking.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
       </motion.div>
@@ -137,32 +309,5 @@ const Earnings = () => {
     </div>
   )
 }
-
-const StatCard = ({ title, icon: Icon, value, color }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-gray-400 text-sm">{title}</p>
-        <p className={`text-2xl font-bold text-${color}-400`}>₹ {value.toFixed(2)}</p>
-      </div>
-      <div className={`w-12 h-12 bg-${color}-400/10 rounded-lg flex items-center justify-center`}>
-        <Icon className={`w-6 h-6 text-${color}-400`} />
-      </div>
-    </div>
-  </motion.div>
-)
-
-const StatMini = ({ title, value, isCurrency = false }) => (
-  <div className="text-center">
-    <p className="text-white font-medium">
-      {isCurrency ? `₹ ${value.toFixed(2)}` : value}
-    </p>
-    <p className="text-gray-400 text-sm">{title}</p>
-  </div>
-)
 
 export default Earnings

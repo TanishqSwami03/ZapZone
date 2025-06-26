@@ -68,9 +68,9 @@ const ManageStations = () => {
     await updateDoc(doc(db, "stations", stationId), updateData)
   }
 
-  const deleteStation = async (stationId) => {
-    await deleteDoc(doc(db, "stations", stationId))
-  }
+  // const deleteStation = async (stationId) => {
+  //   await deleteDoc(doc(db, "stations", stationId))
+  // }
 
   const handleStationActions = (station) => {
     setSelectedStation(station)
@@ -83,14 +83,14 @@ const ManageStations = () => {
     setShowEditModal(true)
   }
 
-  const handleDeleteStation = (station) => {
-    deleteStation(station.id)
-    setShowActionsModal(false)
-    setSelectedStation(null)
-  }
+  // const handleDeleteStation = (station) => {
+  //   deleteStation(station.id)
+  //   setShowActionsModal(false)
+  //   setSelectedStation(null)
+  // }
 
   const handleSuspendStation = (station) => {
-    updateStation(station.id, { status: "inactive" })
+    updateStation(station.id, { status: "suspended" })
     setShowActionsModal(false)
     setSelectedStation(null)
   }
@@ -105,7 +105,7 @@ const ManageStations = () => {
     switch (status) {
       case "active":
         return "text-green-400 bg-green-400/10 border-green-400/20"
-      case "inactive":
+      case "suspended":
         return "text-red-400 bg-red-400/10 border-red-400/20"
       default:
         return "text-gray-400 bg-gray-400/10 border-gray-400/20"
@@ -116,10 +116,21 @@ const ManageStations = () => {
     switch (status) {
       case "active":
         return CheckCircle
-      case "inactive":
+      case "suspended":
         return AlertCircle
       default:
         return AlertCircle
+    }
+  }
+
+  const getBorderColor = (status) => {
+    switch(status) {
+      case "active":
+        return "#05df72"
+      case "suspended":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
     }
   }
 
@@ -145,10 +156,12 @@ const ManageStations = () => {
             />
           </div>
 
+          {/* Add Station */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddModal(true)}
+            whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
             className="flex items-center px-4 py-2 bg-blue-400/10 text-blue-400 border border-blue-400/20 rounded-lg hover:bg-blue-400/20 transition-all duration-200"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -159,58 +172,115 @@ const ManageStations = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {[
-          {
-            title: "Total Stations",
-            value: companyStations.length,
-            icon: <MapPin className="w-6 h-6 text-blue-400" />,
-            bg: "bg-blue-400/10",
-          },
-          {
-            title: "Active Stations",
-            value: companyStations.filter((s) => s.status === "active").length,
-            icon: <CheckCircle className="w-6 h-6 text-green-400" />,
-            bg: "bg-green-400/10",
-            delay: 0.1,
-          },
-          {
-            title: "Total Chargers",
-            value: companyStations.reduce((sum, s) => sum + s.chargers, 0),
-            icon: <Zap className="w-6 h-6 text-purple-400" />,
-            bg: "bg-purple-400/10",
-            delay: 0.2,
-          },
-          {
-            title: "Avg. Rating",
-            value:
-              companyStations.length > 0
-                ? (
-                    companyStations.reduce((sum, s) => sum + s.rating, 0) / companyStations.length
-                  ).toFixed(1)
-                : "0.0",
-            icon: <Eye className="w-6 h-6 text-yellow-400" />,
-            bg: "bg-yellow-400/10",
-            delay: 0.3,
-          },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: stat.delay || 0 }}
-            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400">{stat.title}</p>
-                <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
-              </div>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
-                {stat.icon}
-              </div>
+        {/* Total Stations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#3B82F6", // Tailwind blue-500
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)",
+          }}
+          transition={{ delay: 0, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Stations</p>
+              <p className="text-2xl font-bold text-white mt-1">{companyStations.length}</p>
             </div>
-          </motion.div>
-        ))}
+            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-blue-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Active Stations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#22C55E",
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.5)",
+          }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Active Stations</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {companyStations.filter((s) => s.status === "active").length}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-green-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Total Chargers */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#A855F7", // Tailwind purple-500
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(168, 85, 247, 0.5)",
+          }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Chargers</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {companyStations.reduce((sum, s) => sum + s.chargers, 0)}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
+              <Zap className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Average Rating */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#FACC15", // Tailwind yellow-400
+            borderWidth: "2px",
+            boxShadow: "0 0 0 2px rgba(250, 204, 21, 0.5)",
+          }}
+          transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Avg. Rating</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {companyStations.length > 0
+                  ? (
+                      companyStations.reduce((sum, s) => sum + s.rating, 0) / companyStations.length
+                    ).toFixed(1)
+                  : "0.0"}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
+              <Eye className="w-6 h-6 text-yellow-400" />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Stations Grid */}
@@ -222,7 +292,8 @@ const ManageStations = () => {
               key={station.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -2, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
               className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
             >
               {/* Header */}
@@ -235,9 +306,9 @@ const ManageStations = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(station.status)}`}>
+                  <div className={`flex items-center px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(station.status)}`}>
                     <StatusIcon className="w-3 h-3 mr-1" />
-                    {station.status}
+                    {station.status.toUpperCase()}
                   </div>
                   <button
                     onClick={() => handleStationActions(station)}
@@ -250,19 +321,19 @@ const ManageStations = () => {
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4 text-center mt-2">
-                <div className="bg-gray-700/40 p-3 rounded-xl">
+                <div className="bg-gray-800 p-3 rounded-xl">
                   <p className="text-xs text-gray-400 mb-1">Total Chargers</p>
                   <p className="text-xl text-white font-semibold">{station.chargers}</p>
                 </div>
-                <div className="bg-gray-700/40 p-3 rounded-xl">
+                <div className="bg-gray-800 p-3 rounded-xl">
                   <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
                   <p className="text-xl text-white font-semibold">{station.vacantChargers}</p>
                 </div>
-                <div className="bg-gray-700/40 p-3 rounded-xl">
+                <div className="bg-gray-800 p-3 rounded-xl">
                   <p className="text-xs text-gray-400 mb-1">Bookings</p>
                   <p className="text-xl text-white font-semibold">{station.completedBookings}</p>
                 </div>
-                <div className="bg-gray-700/40 p-3 rounded-xl">
+                <div className="bg-gray-800 p-3 rounded-xl">
                   <p className="text-xs text-gray-400 mb-1">Revenue</p>
                   <p className="text-xl text-white font-semibold">₹ {station.revenue}</p>
                 </div>
@@ -283,7 +354,6 @@ const ManageStations = () => {
           );
         })}
       </div>
-
 
       {/* No Stations */}
       {filteredStations.length === 0 && (
@@ -324,7 +394,7 @@ const ManageStations = () => {
         onClose={() => setShowActionsModal(false)}
         station={selectedStation}
         onEdit={handleEditStation}
-        onDelete={handleDeleteStation}
+        // onDelete={handleDeleteStation}
         onSuspend={handleSuspendStation}
         onActivate={handleActivateStation}
       />

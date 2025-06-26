@@ -178,6 +178,17 @@ const StationModeration = () => {
     }
   }
 
+  const getBorderColor = (status) => {
+    switch(status) {
+      case "active":
+        return "#05df72"
+      case "suspended":
+        return "#F87171"
+      default:
+        return "#9CA3AF"
+    }
+  }
+
   const pendingCount = stations.filter((s) => s.status === "pending").length
   const activeCount = stations.filter((s) => s.status === "active").length
   const rejectedCount = stations.filter((s) => s.status === "rejected").length
@@ -221,13 +232,20 @@ const StationModeration = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
         {/* Total Stations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#A855F7",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -262,8 +280,14 @@ const StationModeration = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#05df72",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -280,8 +304,14 @@ const StationModeration = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#FACC15",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -314,7 +344,7 @@ const StationModeration = () => {
       </div>
 
       {/* Stations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 py-3">
         {filteredStations.map((station, index) => {
           const StatusIcon = getStatusIcon(station.status)
           return (
@@ -322,8 +352,14 @@ const StationModeration = () => {
               key={station.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
+              whileHover={{
+                scale: 1.05,
+                y: -2,
+                borderColor: `${getBorderColor(station.status)}`,
+                borderWidth: "3px",
+              }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
             >
               {/* Name, address, companyName, status */}
               <div className="flex items-start justify-between mb-4">
@@ -353,17 +389,17 @@ const StationModeration = () => {
 
               {/* Chargers, Vacant Chargers, Completed Bookings */}
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Chargers</p>
                   <p className="text-sm font-bold text-white">
                     {station.chargers} 
                   </p>
                 </div>
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
                   <p className="text-sm font-bold text-white">{station.vacantChargers}</p>
                 </div>
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Completed Bookings</p>
                   <p className="text-sm font-bold text-white">{station.completedBookings}</p>
                 </div>
@@ -371,15 +407,15 @@ const StationModeration = () => {
 
               {/* Revenue, Rating */}
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Revenue</p>
                   <p className="text-sm font-bold text-green-400">
                     ₹ {station.revenue} 
                   </p>
                 </div>
-                <div className="text-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Rating</p>
-                  <p className="text-sm font-bold text-white">{station.rating} ⭐</p>
+                  <p className="text-sm font-bold text-white">{station.rating.toFixed(1)} ⭐</p>
                 </div>
               </div>  
 

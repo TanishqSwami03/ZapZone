@@ -1,64 +1,161 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Clock, MapPin, User, DollarSign, CheckCircle, AlertCircle, XCircle } from "lucide-react"
-import { useUser } from "../../context/UserContext"
+import {
+  Calendar, Clock, MapPin, User,
+  DollarSign, CheckCircle, AlertCircle, XCircle,
+  IndianRupee
+} from "lucide-react"
+import { collection, onSnapshot, query, where } from "firebase/firestore"
+import { db, auth } from "../../firebase/firebaseConfig"
 
 const BookingManagement = () => {
-  const { bookings, stations } = useUser()
+  const [bookings, setBookings] = useState([])
+  const [stations, setStations] = useState([])
   const [selectedStatus, setSelectedStatus] = useState("")
   const [selectedStation, setSelectedStation] = useState("")
+  const [companyId, setCompanyId] = useState(null)
+  const [users, setUsers] = useState([])
 
-  // Filter bookings for company stations (mock company ID = 1)
-  const companyStations = stations.filter((station) => station.companyId === 1)
-  const companyStationIds = companyStations.map((station) => station.id)
-  const companyBookings = bookings.filter((booking) => companyStationIds.includes(booking.stationId))
+  // ✅ Get current user's UID (auth state)
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCompanyId(user.uid) // Directly use UID
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
-  const statusOptions = [
-    { value: "", label: "All Bookings" },
-    { value: "upcoming", label: "Upcoming" },
-    { value: "completed", label: "Completed" },
-    { value: "cancelled", label: "Cancelled" },
-  ]
+  // 🟢 Get stations for the logged-in company
+  useEffect(() => {
+    if (!companyId) return
 
-  const filteredBookings = companyBookings.filter((booking) => {
+    const q = query(collection(db, "stations"), where("companyId", "==", companyId))
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const stationList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setStations(stationList)
+    })
+
+    return () => unsubscribe()
+  }, [companyId])
+
+  useEffect(() => {
+    if (!companyId) return
+
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const userList = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setUsers(userList)
+    })
+
+    return () => unsubscribe()
+  }, [companyId])
+
+  // 🔵 Get bookings for those stations
+  useEffect(() => {
+    if (stations.length === 0) return
+
+    const unsubscribe = onSnapshot(collection(db, "bookings"), (snapshot) => {
+      const allBookings = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      const stationIds = stations.map((s) => s.id)
+      const filtered = allBookings.filter((b) => stationIds.includes(b.stationId))
+      setBookings(filtered)
+    })
+
+    return () => unsubscribe()
+  }, [stations])
+
+  // 🟡 Loading state
+  if (companyId === null) {
+    return (
+      <div className="text-center text-gray-400 py-10">
+        Loading booking data...
+      </div>
+    )
+  }
+
+  // 🔍 Filtered bookings
+  const filteredBookings = bookings.filter((booking) => {
     const matchesStatus = !selectedStatus || booking.status === selectedStatus
-    const matchesStation = !selectedStation || booking.stationId.toString() === selectedStation
+    const matchesStation = !selectedStation || booking.stationId === selectedStation
     return matchesStatus && matchesStation
   })
 
+  const statusOptions = [
+    { value: "", label: "All Bookings" },
+    { value: "completed", label: "Completed" },
+    { value: "cancelled", label: "Cancelled" },
+    { value: "charging", label: "Charging" },
+  ]
+
   const getStatusIcon = (status) => {
     switch (status) {
-      case "completed":
-        return CheckCircle
-      case "upcoming":
-        return Clock
-      case "cancelled":
-        return XCircle
-      default:
-        return AlertCircle
+      case "completed": return CheckCircle
+      case "cancelled": return XCircle
+      case "charging": return Zap
+      default: return AlertCircle
     }
   }
 
   const getStatusColor = (status) => {
     switch (status) {
+      case "completed": return "text-green-400 bg-green-400/10 border-green-400/20"
+      case "charging": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
+      case "cancelled": return "text-red-400 bg-red-400/10 border-red-400/20"
+      default: return "text-gray-400 bg-gray-400/10 border-gray-400/20"
+    }
+  }
+
+  const getBorderColor = (status) => {
+    switch(status) {
       case "completed":
-        return "text-green-400 bg-green-400/10 border-green-400/20"
-      case "upcoming":
-        return "text-blue-400 bg-blue-400/10 border-blue-400/20"
+        return "#05df72"
+      case "confirmed":
+        return "#51a2ff"
+      case "charging":
+        return "#fdc700"
       case "cancelled":
-        return "text-red-400 bg-red-400/10 border-red-400/20"
+        return "#F87171"
       default:
-        return "text-gray-400 bg-gray-400/10 border-gray-400/20"
+        return "#9CA3AF"
     }
   }
 
   const totalRevenue = filteredBookings
     .filter((booking) => booking.status === "completed")
-    .reduce((sum, booking) => sum + booking.cost, 0)
+    .reduce((sum, booking) => sum + (booking.cost || 0), 0)
 
-  const upcomingBookings = filteredBookings.filter((booking) => booking.status === "upcoming").length
+  const getUserName = (userId) => {
+    const user = users.find((u) => u.uid === userId)
+    return user ? user.name : "Unknown User"
+  }
+
+  const formatTo12Hour = (time24) => {
+    const [hours, minutes, seconds] = time24.split(":")
+    const date = new Date()
+    date.setHours(+hours)
+    date.setMinutes(+minutes)
+    date.setSeconds(+seconds || 0)
+
+    return date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+  }
+
+  const completedCount = bookings.filter((b) => b.status === "completed").length
 
   return (
     <div className="space-y-6">
@@ -72,15 +169,19 @@ const BookingManagement = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        {/* Completed Bookings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Total Bookings</p>
-              <p className="text-2xl font-bold text-white">{companyBookings.length}</p>
+              <p className="text-gray-400 text-sm">Completed Bookings</p>
+              <p className="text-2xl font-bold text-white">{completedCount}</p>
             </div>
             <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
               <Calendar className="w-6 h-6 text-blue-400" />
@@ -88,7 +189,7 @@ const BookingManagement = () => {
           </div>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -103,18 +204,20 @@ const BookingManagement = () => {
               <Clock className="w-6 h-6 text-yellow-400" />
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
+        {/* Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Revenue (Completed)</p>
-              <p className="text-2xl font-bold text-white">${totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-white">₹ {totalRevenue.toFixed(2)}</p>
             </div>
             <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-400" />
@@ -122,22 +225,21 @@ const BookingManagement = () => {
           </div>
         </motion.div>
 
+        {/* Completion Rate */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#b773f0", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Completion Rate</p>
               <p className="text-2xl font-bold text-white">
-                {companyBookings.length > 0
-                  ? Math.round(
-                      (companyBookings.filter((b) => b.status === "completed").length / companyBookings.length) * 100,
-                    )
-                  : 0}
-                %
+                {bookings.length > 0
+                  ? Math.round((bookings.filter((b) => b.status === "completed").length / bookings.length) * 100)
+                  : 0}%
               </p>
             </div>
             <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
@@ -148,14 +250,14 @@ const BookingManagement = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Status</label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -170,10 +272,10 @@ const BookingManagement = () => {
             <select
               value={selectedStation}
               onChange={(e) => setSelectedStation(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
             >
               <option value="">All Stations</option>
-              {companyStations.map((station) => (
+              {stations.map((station) => (
                 <option key={station.id} value={station.id}>
                   {station.name}
                 </option>
@@ -184,7 +286,7 @@ const BookingManagement = () => {
       </div>
 
       {/* Bookings List */}
-      <div className="space-y-4">
+      <div className="space-y-1 grid grid-cols-1 md:grid-cols-2 gap-7">
         {filteredBookings.map((booking, index) => {
           const StatusIcon = getStatusIcon(booking.status)
           const station = stations.find((s) => s.id === booking.stationId)
@@ -194,22 +296,21 @@ const BookingManagement = () => {
               key={booking.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300"
+              whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "2px", boxShadow: "0 0 8px 2px rgba(59, 130, 246, 0.5)" }}
+              transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
             >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1">
+                <div className="flex-2">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">Booking #{booking.id}</h3>
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {station?.name || "Unknown Station"}
+                      <p className="text-xs text-gray-400 mb-1">Customer</p>
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 text-blue-400 mr-1" />
+                        <span className="text-white font-medium">{getUserName(booking.userId)}</span>
                       </div>
                     </div>
-                    <div
-                      className={`flex items-center px-3 py-1 rounded-full text-sm border ${getStatusColor(booking.status)}`}
-                    >
+                    <div className={`flex items-center px-3 py-1 rounded-full text-sm border ${getStatusColor(booking.status)}`}>
                       <StatusIcon className="w-4 h-4 mr-1" />
                       {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                     </div>
@@ -217,10 +318,10 @@ const BookingManagement = () => {
 
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">Customer</p>
+                      <p className="text-xs text-gray-400 mb-1">Station</p>
                       <div className="flex items-center">
-                        <User className="w-4 h-4 text-blue-400 mr-1" />
-                        <span className="text-white font-medium">John Doe</span>
+                        <MapPin className="w-4 text-yellow-400 h-4 mr-1" />
+                        {station?.name || "Unknown Station"}
                       </div>
                     </div>
                     <div>
@@ -231,14 +332,8 @@ const BookingManagement = () => {
                       </div>
                       <div className="flex items-center mt-1">
                         <Clock className="w-4 h-4 text-green-400 mr-1" />
-                        <span className="text-white font-medium">{booking.time}</span>
+                        <span className="text-white font-medium">{formatTo12Hour(booking.time)}</span>
                       </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">Charger Type</p>
-                      <span className="px-2 py-1 bg-blue-400/10 text-blue-400 text-xs rounded border border-blue-400/20">
-                        {booking.chargerType}
-                      </span>
                     </div>
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Duration</p>
@@ -247,14 +342,14 @@ const BookingManagement = () => {
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Revenue</p>
                       <div className="flex items-center">
-                        <DollarSign className="w-4 h-4 text-green-400 mr-1" />
-                        <span className="text-white font-medium">${booking.cost.toFixed(2)}</span>
+                        <IndianRupee className="w-4 h-4 text-green-400 mr-1" />
+                        <span className="text-white font-medium">{booking.cost.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
 
                   {booking.status === "completed" && booking.rating && (
-                    <div className="mt-4 p-3 bg-gray-700 rounded-lg">
+                    <div className="w-fit mt-4 p-3 bg-gray-800 rounded-lg">
                       <p className="text-xs text-gray-400 mb-1">Customer Rating</p>
                       <div className="flex items-center">
                         <span className="text-yellow-400 mr-2">{"★".repeat(booking.rating)}</span>

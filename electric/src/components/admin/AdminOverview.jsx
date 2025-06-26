@@ -1,23 +1,21 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
-import { useNavigate} from "react-router-dom"
 import {
   Building2,
   Users,
   BarChart3,
-  AlertCircle,
   CheckCircle,
-  Clock,
   DollarSign,
   MapPin,
   Shield,
-  Building2Icon,
-  Zap,
+  Building2Icon
 } from "lucide-react"
-import { useMemo, useEffect, useState } from "react"
+
 import { collection, onSnapshot } from "firebase/firestore"
 import { db } from "../../firebase/firebaseConfig"
+import { useNavigate } from "react-router-dom"
 
 const AdminOverview = () => {
   const navigate = useNavigate()
@@ -27,22 +25,18 @@ const AdminOverview = () => {
   const [companies, setCompanies] = useState([])
 
   useEffect(() => {
-    const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+    const unsubUsers = onSnapshot(collection(db, "users"), snapshot =>
       setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-    })
-
-    const unsubStations = onSnapshot(collection(db, "stations"), (snapshot) => {
+    )
+    const unsubStations = onSnapshot(collection(db, "stations"), snapshot =>
       setStations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-    })
-
-    const unsubBookings = onSnapshot(collection(db, "bookings"), (snapshot) => {
+    )
+    const unsubBookings = onSnapshot(collection(db, "bookings"), snapshot =>
       setBookings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-    })
-
-    const unsubCompanies = onSnapshot(collection(db, "companies"), (snapshot) => {
+    )
+    const unsubCompanies = onSnapshot(collection(db, "companies"), snapshot =>
       setCompanies(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
-    })
-
+    )
     return () => {
       unsubUsers()
       unsubStations()
@@ -54,189 +48,239 @@ const AdminOverview = () => {
   const totalUsers = users.length
   const totalCompanies = companies.length
   const totalStations = stations.length
-  const totalRevenue = bookings.reduce((sum, b) => sum + (b.cost || 0), 0)
+  const totalRevenue = bookings
+  .filter(b => b.status === "completed")
+  .reduce((sum, b) => sum + (b.cost || 0), 0)
 
-  const quickStats = [
-    { title: "Total Stations", value: totalStations, icon: MapPin, color: "blue" },
-    { title: "Total Companies", value: totalCompanies, icon: Building2Icon, color: "yellow" },
-    { title: "Total Users", value: totalUsers, icon: Users, color: "green" },
-    { title: "Total Revenue", value: `₹ ${totalRevenue.toFixed(0)}`, icon: DollarSign, color: "purple" },
-  ]
+  const timeAgo = seconds => {
+    const diff = Math.floor(Date.now() / 1000) - seconds
+    if (diff < 60) return `${diff}s ago`
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+    return `${Math.floor(diff / 86400)}d ago`
+  }
 
-  // 🔥 Real Recent Activity (Top 5 recent entities)
   const recentActivity = useMemo(() => {
     const combined = [
-      ...users.map((u) => ({
+      ...users.map(u => ({
         createdAt: u.createdAt?.seconds || 0,
         message: u.type === "company" ? "New company registered" : "New user joined",
         icon: u.type === "company" ? Building2 : Users,
-        color: u.type === "company" ? "purple" : "green",
+        color: "purple",
       })),
-      ...stations.map((s) => ({
+      ...stations.map(s => ({
         createdAt: s.createdAt?.seconds || 0,
         message: `Station "${s.name}" registered`,
         icon: MapPin,
         color: "blue",
       })),
-      ...bookings.map((b) => ({
+      ...bookings.map(b => ({
         createdAt: b.createdAt?.seconds || 0,
         message: "Charging session completed",
         icon: CheckCircle,
         color: "yellow",
       })),
     ]
-
     return combined
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 5)
-      .map((entry) => ({
+      .map(entry => ({
         ...entry,
-        // time: timeAgo(entry.createdAt),
+        time: timeAgo(entry.createdAt),
       }))
   }, [users, stations, bookings])
 
-  const quickActions = [
-    { title: "Review Stations", icon: Building2, color: "blue", path: "/admin/stations" },
-    { title: "Manage Users", icon: Users, color: "green", path: "/admin/users" },
-    { title: "View Companies", icon: Building2, color: "purple", path: "/admin/companies" },
-    { title: "View Reports", icon: BarChart3, color: "yellow", path: "/admin/reports" },
-  ]
-
-  const getColorClasses = (color) => {
-    const colors = {
-      blue: "bg-blue-400/10 text-blue-400 border-blue-400/20 hover:bg-blue-400/20",
-      green: "bg-green-400/10 text-green-400 border-green-400/20 hover:bg-green-400/20",
-      purple: "bg-purple-400/10 text-purple-400 border-purple-400/20 hover:bg-purple-400/20",
-      yellow: "bg-yellow-400/10 text-yellow-400 border-yellow-400/20 hover:bg-yellow-400/20",
-      red: "bg-red-400/10 text-red-400 border-red-400/20 hover:bg-red-400/20",
-    }
-    return colors[color] || colors.blue
-  }
-
-  const getIconBgColor = (color) => {
-    const colors = {
-      blue: "bg-blue-400/10",
-      green: "bg-green-400/10",
-      purple: "bg-purple-400/10",
-      yellow: "bg-yellow-400/10",
-      red: "bg-red-400/10",
-    }
-    return colors[color] || colors.blue
-  }
-
-  const getIconColor = (color) => {
-    const colors = {
-      blue: "text-blue-400",
-      green: "text-green-400",
-      purple: "text-purple-400",
-      yellow: "text-yellow-400",
-      red: "text-red-400",
-    }
-    return colors[color] || colors.blue
-  }
-
-  const timeAgo = (seconds) => {
-    const diff = Math.floor(Date.now() / 1000) - seconds
-    if (diff < 60) return `${diff} sec ago`
-    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`
-    return `${Math.floor(diff / 86400)} day ago`
-  }
-
   return (
-    <div className="space-y-6 h-full overflow-hidden">
-      {/* Welcome Header */}
-      <div className="text-center">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-14 h-14 rounded-xl bg-purple-400/10 flex items-center justify-center">
+          <Shield className="w-7 h-7 text-purple-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+          <p className="text-gray-400">System Administration & Oversight</p>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        {/* Total Stations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center mb-4"
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#3B82F6",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
         >
-          <div className="w-16 h-16 bg-purple-400/10 rounded-2xl flex items-center justify-center mr-4">
-            <Shield className="w-8 h-8 text-purple-400" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-gray-400">System Administration & Management</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Stations</p>
+              <p className="text-2xl font-bold text-white mt-1">{totalStations}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-blue-400" />
+            </div>
           </div>
         </motion.div>
-      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickStats.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-gray-900 border border-gray-700 rounded-2xl px-8 py-6 transform transition-all duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-purple-500/10"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className={`w-12 h-12 ${getIconBgColor(stat.color)} rounded-lg flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 ${getIconColor(stat.color)}`} />
-                </div>
-                <div>
-                  <p className={`text-lg font-semibold ${getIconColor(stat.color)}`}>{stat.title}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
-              </div>
+        {/* Total Companies */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#FACC15",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Companies</p>
+              <p className="text-2xl font-bold text-white mt-1">{totalCompanies}</p>
             </div>
-          </motion.div>
-        ))}
+            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
+              <Building2Icon className="w-6 h-6 text-yellow-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Total Users */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#10B981",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Users</p>
+              <p className="text-2xl font-bold text-white mt-1">{totalUsers}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-green-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Total Revenue */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{
+            scale: 1.05,
+            y: -2,
+            borderColor: "#A855F7",
+            borderWidth: "3px",
+          }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Total Revenue</p>
+              <p className="text-2xl font-bold text-white mt-1">₹ {totalRevenue.toFixed(0)}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+        </motion.div>
+        
       </div>
 
-      {/* Two Column Layout for Quick Actions and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 pb-20">
+      {/* Quick Actions & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <h3 className="text-lg font-semibold text-white mb-6">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-4">
-            {quickActions.map((action, index) => (
+            {[
+              { title: "Review Stations", icon: Building2, color: "blue", path: "/admin/stations" },
+              { title: "Manage Users", icon: Users, color: "green", path: "/admin/users" },
+              { title: "View Companies", icon: Building2, color: "purple", path: "/admin/companies" },
+              { title: "View Reports", icon: BarChart3, color: "yellow", path: "/admin/reports" }
+            ].map((action, index) => (
               <motion.button
                 key={action.title}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ delay: index * 0.05 }}
                 onClick={() => navigate(action.path)}
-                className={`flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-200 hover:scale-105 ${getColorClasses(action.color)}`}
+                className={`flex flex-col items-center justify-center p-6 rounded-xl border border-gray-700 bg-gray-900 hover:bg-gray-800 transition-all`}
               >
-                <action.icon className={`w-8 h-8 mb-3 ${getIconColor(action.color)}`} />
-                <span className="text-sm font-medium text-center">{action.title}</span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${
+                  action.color === "blue" ? "bg-blue-400/10" :
+                  action.color === "green" ? "bg-green-400/10" :
+                  action.color === "purple" ? "bg-purple-400/10" :
+                  action.color === "yellow" ? "bg-yellow-400/10" : ""
+                }`}>
+                  <action.icon
+                    className={`w-6 h-6 ${
+                      action.color === "blue" ? "text-blue-400" :
+                      action.color === "green" ? "text-green-400" :
+                      action.color === "purple" ? "text-purple-400" :
+                      action.color === "yellow" ? "text-yellow-400" : ""
+                    }`}
+                  />
+                </div>
+                <span className="text-sm text-white text-center font-medium">{action.title}</span>
               </motion.button>
             ))}
           </div>
         </motion.div>
 
-        {/* Real Recent Activity */}
+        {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <h3 className="text-lg font-semibold text-white mb-6">Recent Activity</h3>
-          <div className="space-y-4 max-h-80 overflow-y-auto">
+          <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
             {recentActivity.length === 0 ? (
               <p className="text-gray-400 text-sm">No recent activity.</p>
             ) : (
               recentActivity.map((activity, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors"
                 >
-                  <div className={`w-10 h-10 ${getIconBgColor(activity.color)} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <activity.icon className={`w-5 h-5 ${getIconColor(activity.color)}`} />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    activity.color === "blue" ? "bg-blue-400/10" :
+                    activity.color === "green" ? "bg-green-400/10" :
+                    activity.color === "purple" ? "bg-purple-400/10" :
+                    activity.color === "yellow" ? "bg-yellow-400/10" : ""
+                  }`}>
+                    <activity.icon
+                      className={`w-5 h-5 ${
+                        activity.color === "blue" ? "text-blue-400" :
+                        activity.color === "green" ? "text-green-400" :
+                        activity.color === "purple" ? "text-purple-400" :
+                        activity.color === "yellow" ? "text-yellow-400" : ""
+                      }`}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">{activity.message}</p>
@@ -249,9 +293,6 @@ const AdminOverview = () => {
         </motion.div>
       </div>
 
-      <footer className="text-center py-4 text-gray-500 text-sm border-t mt-8">
-        © {new Date().getFullYear()} Your Company Name. All rights reserved.
-      </footer>
     </div>
   )
 }
