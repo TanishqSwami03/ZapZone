@@ -91,27 +91,6 @@ const Reports = () => {
           <h1 className="text-2xl font-bold text-white mb-2">Analytics & Reports</h1>
           <p className="text-gray-400">Platform performance and business insights</p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-2">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-400"
-          >
-            {periodOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center px-4 py-2 bg-purple-400/10 text-purple-400 border border-purple-400/20 rounded-lg hover:bg-purple-400/20 transition-all duration-200"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </motion.button>
-        </div>
       </div>
 
       {/* Stat Cards */}

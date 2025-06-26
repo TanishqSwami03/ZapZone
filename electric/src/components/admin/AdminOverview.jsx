@@ -83,7 +83,7 @@ const AdminOverview = () => {
     ]
     return combined
       .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 5)
+      .slice(0, 4)
       .map(entry => ({
         ...entry,
         time: timeAgo(entry.createdAt),

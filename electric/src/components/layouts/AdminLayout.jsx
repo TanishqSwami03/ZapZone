@@ -65,7 +65,7 @@ const AdminLayout = ({ children }) => {
 
       {/* Sidebar - Hidden on mobile, visible on desktop */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-        <div className="flex flex-col flex-grow bg-gray-800 border-r border-gray-700">
+        <div className="flex flex-col flex-grow border-r bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-md border border-gray-700 shadow-md">
           <div className="h-16 w-full border-b border-gray-700 flex justify-center items-center px-6">
             <div className="flex items-center">
               <Zap className="w-8 h-8 text-purple-400 mr-2" />
@@ -190,6 +190,7 @@ const AdminLayout = ({ children }) => {
             </div>
           </nav>
 
+          {/* Logout */}
           <div className="p-4 border-t border-gray-700">
             <button
               onClick={() => setShowLogoutConfirm(true)}
@@ -210,7 +211,7 @@ const AdminLayout = ({ children }) => {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.3 }}
-            className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700 lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 w-64 border-r lg:hidden bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-md border border-gray-700 shadow-md"
           >
             <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
               <div className="flex items-center">
@@ -361,7 +362,7 @@ const AdminLayout = ({ children }) => {
       {/* Main content */}
       <div className="flex-1 lg:pl-64">
         {/* Header */}
-        <header className="bg-gray-800 border-b border-gray-700 h-16 flex items-center justify-between px-6">
+        <header className="border-b h-16 flex items-center justify-between px-6 bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-lg border border-gray-700 p-6 shadow-md">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-400 hover:text-white">
             <Menu className="w-6 h-6" />
           </button>
