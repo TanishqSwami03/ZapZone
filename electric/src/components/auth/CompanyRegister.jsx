@@ -337,7 +337,7 @@ const CompanyRegister = () => {
                 </div>
               </div>
 
-              <div className="flex items-start pt-2">
+              {/* <div className="flex items-start pt-2">
                 <input
                   type="checkbox"
                   className="mt-1 mr-2 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-400"
@@ -348,6 +348,15 @@ const CompanyRegister = () => {
                   <Link to="/terms" className="text-blue-400 hover:text-blue-300">Terms of Service</Link> and{" "}
                   <Link to="/privacy" className="text-blue-400 hover:text-blue-300">Privacy Policy</Link>
                 </label>
+              </div> */}
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  {/* <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span> */}
+                </div>
               </div>
 
               <motion.button
@@ -359,7 +368,7 @@ const CompanyRegister = () => {
                 Create Company Account
               </motion.button>
 
-              <div className="relative my-4">
+              {/* <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-600"></div>
                 </div>
@@ -381,7 +390,7 @@ const CompanyRegister = () => {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 Continue with Google
-              </motion.button>
+              </motion.button> */}
             </form>
           </motion.div>
 

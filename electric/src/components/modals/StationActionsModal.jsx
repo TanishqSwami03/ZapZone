@@ -31,7 +31,7 @@ const StationActionsModal = ({ isOpen, onClose, station, onEdit, onDelete, onSus
               </div>
               <div className="flex-1">
                 <h3 className="text-white font-medium">{station.name}</h3>
-                <p className="text-gray-400 text-sm truncate">{station.address}</p>
+                <p className="text-gray-400 text-sm truncate">{station.address}, {station.city}</p>
               </div>
             </div>
 
@@ -63,13 +63,13 @@ const StationActionsModal = ({ isOpen, onClose, station, onEdit, onDelete, onSus
                 </button>
               )}
 
-              <button
+              {/* <button
                 onClick={() => onDelete(station)}
                 className="w-full flex items-center px-4 py-3 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
               >
                 <Trash2 className="w-5 h-5 mr-3" />
                 Delete Station
-              </button>
+              </button> */}
             </div>
 
             {/* Cancel Button */}

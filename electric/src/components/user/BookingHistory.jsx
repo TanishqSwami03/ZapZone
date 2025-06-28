@@ -371,13 +371,13 @@ const BookingHistory = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Total Bookings */}
+        {/* Completed Bookings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -394,9 +394,9 @@ const BookingHistory = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -415,13 +415,13 @@ const BookingHistory = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.05, y: -2, borderColor: "#c27aff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
+          whileHover={{ scale: 1.05, y: -2, borderColor: "#c27aff", borderWidth: "2px" }}
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Charging Hours</p>
+              <p className="text-gray-400 text-sm">Charging Duration</p>
               <p className="text-2xl font-bold text-white">
                 {(() => {
                   const totalMin = userStats?.chargingHours ?? 0;
@@ -451,9 +451,9 @@ const BookingHistory = () => {
               key={booking.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "2px", boxShadow: "0 0 8px 2px rgba(59, 130, 246, 0.5)" }}
-              transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
-              className="relative bg-gray-900 rounded-2xl border border-gray-700 p-5 shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.05, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "3px" }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative hover:shadow-xl transition-all bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
             >
               {/* Status badge */}
               <div className={`absolute top-4 left-4 flex items-center gap-2 px-3 py-1 text-sm rounded-full border ${getStatusColor(booking.status)}`}>

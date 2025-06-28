@@ -282,7 +282,7 @@ const UserRegister = () => {
             </div>
 
             {/* Terms Checkbox */}
-            <div className="flex items-start">
+            {/* <div className="flex items-start">
               <input
                 type="checkbox"
                 className="mt-1 mr-2 rounded border-gray-600 bg-gray-700 text-green-400 focus:ring-green-400"
@@ -298,6 +298,15 @@ const UserRegister = () => {
                   Privacy Policy
                 </Link>
               </label>
+            </div> */}
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                {/* <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span> */}
+              </div>
             </div>
 
             {/* Register Button */}
@@ -311,17 +320,17 @@ const UserRegister = () => {
             </motion.button>
 
             {/* Divider */}
-            <div className="relative my-4">
+            {/* <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-600"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Google Register */}
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="button"
@@ -346,7 +355,7 @@ const UserRegister = () => {
                 />
               </svg>
               Continue with Google
-            </motion.button>
+            </motion.button> */}
           </form>
         </motion.div>
 

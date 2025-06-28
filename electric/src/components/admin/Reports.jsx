@@ -252,8 +252,8 @@ const Reports = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-white font-semibold text-sm">₹{station.revenue.toLocaleString()}</p>
                 <p className="text-gray-400 text-xs">Revenue</p>
+                <p className="text-white font-semibold text-sm">₹{station.revenue.toLocaleString()}</p>
               </div>
             </motion.div>
           ))}

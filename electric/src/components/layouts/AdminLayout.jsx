@@ -66,6 +66,7 @@ const AdminLayout = ({ children }) => {
       {/* Sidebar - Hidden on mobile, visible on desktop */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex flex-col flex-grow border-r bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-md border border-gray-700 shadow-md">
+          {/* Logo */}
           <div className="h-16 w-full border-b border-gray-700 flex justify-center items-center px-6">
             <div className="flex items-center">
               <Zap className="w-8 h-8 text-purple-400 mr-2" />

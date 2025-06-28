@@ -73,9 +73,7 @@ const StationModeration = () => {
 
   const statusOptions = [
     { value: "", label: "All Stations" },
-    { value: "pending", label: "Pending Review" },
-    { value: "active", label: "Approved" },
-    { value: "rejected", label: "Rejected" },
+    { value: "active", label: "Active" },
     { value: "suspended", label: "Suspended" },
   ]
 
@@ -214,7 +212,7 @@ const StationModeration = () => {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 250 }}
-            className="relative w-full sm:w-64"
+            className="relative w-3/4 sm:w-64"
           >
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -244,6 +242,7 @@ const StationModeration = () => {
               ))}
             </select>
           </motion.div>
+          
         </motion.div>
       </div>
 
@@ -307,7 +306,7 @@ const StationModeration = () => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Approved</p>
+              <p className="text-gray-400 text-sm">Active Stations</p>
               <p className="text-2xl font-bold text-white">{activeCount}</p>
             </div>
             <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">

@@ -135,7 +135,7 @@ const CompanyLogin = () => {
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-sm">
+            {/* <div className="flex items-center justify-between text-sm">
               <label className="flex items-center text-gray-300">
                 <input
                   type="checkbox"
@@ -146,6 +146,15 @@ const CompanyLogin = () => {
               <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">
                 Forgot password?
               </Link>
+            </div> */}
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                {/* <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span> */}
+              </div>
             </div>
 
             {/* Login Button */}
@@ -159,17 +168,17 @@ const CompanyLogin = () => {
             </motion.button>
 
             {/* Divider */}
-            <div className="relative my-6">
+            {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-600"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Google Login */}
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="button"
@@ -194,7 +203,7 @@ const CompanyLogin = () => {
                 />
               </svg>
               Continue with Google
-            </motion.button>
+            </motion.button> */}
           </form>
         </motion.div>
 

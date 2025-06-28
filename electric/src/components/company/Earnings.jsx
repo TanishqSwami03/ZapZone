@@ -132,11 +132,10 @@ const Earnings = () => {
             scale: 1.05,
             y: -2,
             borderColor: "#05df72",
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(5, 223, 114, 0.5)"
+            borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -157,11 +156,10 @@ const Earnings = () => {
             scale: 1.05,
             y: -2,
             borderColor: "#F87171",
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(248, 113, 113, 0.5)"
+            borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -182,11 +180,10 @@ const Earnings = () => {
             scale: 1.05,
             y: -2,
             borderColor: "#3B82F6",
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"
+            borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -207,11 +204,10 @@ const Earnings = () => {
             scale: 1.05,
             y: -2,
             borderColor: "#A855F7",
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(168, 85, 247, 0.5)"
+            borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg transition-all"
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -229,7 +225,7 @@ const Earnings = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ }}
         className="bg-gray-900 border border-gray-600 rounded-xl p-6"
       >
         <h2 className="text-lg font-semibold text-white mb-6">Station Performance</h2>
@@ -243,9 +239,9 @@ const Earnings = () => {
                 key={station.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px", boxShadow: "0 0 8px 2px rgba(59, 130, 246, 0.5)" }}
-                transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+                whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px"}}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
               >
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4">

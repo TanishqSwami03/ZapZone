@@ -143,7 +143,12 @@ const ManageStations = () => {
           <p className="text-gray-400">Add, edit, and monitor your charging stations</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, delay: 0.1 }} 
+          className="flex flex-col sm:flex-row gap-3"
+        >
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -167,7 +172,7 @@ const ManageStations = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Station
           </motion.button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Stats Cards */}
@@ -179,12 +184,11 @@ const ManageStations = () => {
           whileHover={{
             scale: 1.05,
             y: -2,
-            borderColor: "#3B82F6", // Tailwind blue-500
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)",
+            borderColor: "#3B82F6",
+            borderWidth: "3px",
           }}
-          transition={{ delay: 0, type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -205,11 +209,10 @@ const ManageStations = () => {
             scale: 1.05,
             y: -2,
             borderColor: "#22C55E",
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.5)",
+            borderWidth: "3px",
           }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -231,12 +234,11 @@ const ManageStations = () => {
           whileHover={{
             scale: 1.05,
             y: -2,
-            borderColor: "#A855F7", // Tailwind purple-500
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(168, 85, 247, 0.5)",
+            borderColor: "#A855F7",
+            borderWidth: "3px",
           }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -258,12 +260,11 @@ const ManageStations = () => {
           whileHover={{
             scale: 1.05,
             y: -2,
-            borderColor: "#FACC15", // Tailwind yellow-400
-            borderWidth: "2px",
-            boxShadow: "0 0 0 2px rgba(250, 204, 21, 0.5)",
+            borderColor: "#FACC15",
+            borderWidth: "3px",
           }}
-          transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+          transition={{ type: "spring", stiffness: 300 }}
+          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -292,9 +293,9 @@ const ManageStations = () => {
               key={station.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05, y: -2, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+              whileHover={{ scale: 1.05, y: -2, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px" }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-4">

@@ -141,18 +141,20 @@ const LandingPage = () => {
                 sustainable transportation.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/register"
-                  className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 text-center"
-                >
-                  Start Charging Today
-                </Link>
-                <Link
+                <motion.div whileHover={{scale:1.05, y:-2}}>
+                  <Link
+                    to="/register"
+                    className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 text-center"
+                  >
+                    Start Charging Today
+                  </Link>
+                </motion.div>
+                {/* <Link
                   to="/browse"
                   className="border border-gray-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-all duration-300 text-center"
                 >
                   Browse Stations
-                </Link>
+                </Link> */}
               </div>
             </motion.div>
 
@@ -311,8 +313,9 @@ const LandingPage = () => {
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                className="bg-gray-700 rounded-xl p-8 text-center hover:bg-gray-600 transition-colors"
+                whileHover={{scale: 1.05, y: -2}}
+                transition={{ duration: 0.8 }}
+                className="bg-gray-800 rounded-xl p-8 text-center hover:bg-gray-900 transition-colors border border-green-700 "
               >
                 <div className="w-16 h-16 bg-green-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <feature.icon className="w-8 h-8 text-green-400" />
@@ -371,130 +374,6 @@ const LandingPage = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div className="lg:col-span-1">
-              <div className="flex items-center mb-4">
-                <Zap className="w-8 h-8 text-green-400 mr-2" />
-                <span className="text-white font-bold text-xl">EV Recharge</span>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Leading the future of electric vehicle charging with smart, reliable, and accessible charging solutions.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
-                  <Linkedin className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link to="/browse" className="text-gray-400 hover:text-white transition-colors">
-                    Find Stations
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/register" className="text-gray-400 hover:text-white transition-colors">
-                    Sign Up
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/login" className="text-gray-400 hover:text-white transition-colors">
-                    Login
-                  </Link>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    How It Works
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Cookie Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Contact & Newsletter */}
-            <div>
-              <h3 className="text-white font-semibold mb-4">Stay Connected</h3>
-              <div className="space-y-4">
-                <div className="flex items-center text-gray-400">
-                  <Mail className="w-4 h-4 mr-2" />
-                  <span className="text-sm">support@evrecharge.com</span>
-                </div>
-                <div className="flex items-center text-gray-400">
-                  <Phone className="w-4 h-4 mr-2" />
-                  <span className="text-sm">+1 (555) 123-4567</span>
-                </div>
-                <form onSubmit={handleNewsletterSubmit} className="mt-4">
-                  <div className="flex">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-green-400 text-gray-900 rounded-r-lg hover:bg-green-300 transition-colors"
-                    >
-                      Subscribe
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-            <p className="text-gray-400">© {new Date().getFullYear()} EV Recharge Platform. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

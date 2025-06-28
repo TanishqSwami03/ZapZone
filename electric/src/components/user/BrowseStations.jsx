@@ -59,7 +59,7 @@ const BrowseStations = () => {
           placeholder="Search stations by name or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
+          className="pl-10 pr-4 py-3 focus:ring-1 focus:ring-green-400 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
         />
       </div>
 
@@ -75,9 +75,9 @@ const BrowseStations = () => {
             key={station.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "1px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"}}
-            transition={{ delay: index * 0.1, type: "ease-out", stiffness: 300 }}
-            className="bg-gray-900 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-all duration-300 group flex flex-col"
+            whileHover={{scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "1px"}}
+            transition={{type: "ease-out", stiffness: 300 }}
+            className="group flex flex-col bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
           >
             {/* Station Header */}
             <div className="flex items-start justify-between mb-4">
