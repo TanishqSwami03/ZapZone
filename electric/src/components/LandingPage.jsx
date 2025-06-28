@@ -58,7 +58,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700">
+      <nav className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 shadow-md">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center h-14">
@@ -292,7 +292,7 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-800">
+      <section className="py-20 bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -349,7 +349,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section - Toned Down */}
-      <section className="py-20 bg-gray-800 border-t border-gray-700">
+      <section className="py-20 bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Ready to Start Your EV Journey?</h2>
@@ -364,12 +364,12 @@ const LandingPage = () => {
                 Get Started Today
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
-              <Link
+              {/* <Link
                 to="/browse"
                 className="border border-gray-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-700 transition-colors"
               >
                 Browse Stations
-              </Link>
+              </Link> */}
             </div>
           </motion.div>
         </div>
