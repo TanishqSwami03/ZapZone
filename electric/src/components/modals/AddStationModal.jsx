@@ -25,6 +25,8 @@ const AddStationModal = ({ isOpen, onClose, onAdd }) => {
       completedBookings: 0,
       revenue: 0,
       rating: 0,
+      ratingCount: 0,
+      totalRatings: 0,
       status: "active",
     }
 

@@ -8,7 +8,7 @@ import ChargingConfirmModal from "../../components/modals/ChargingConfirmModal"
 import ConfirmModal from "../../components/modals/ConfirmModal"
 import RatingConfirmationModal from "../../components/modals/RatingConfirmationModal"
 import { db } from "../../firebase/firebaseConfig"
-import { collection, query, where, onSnapshot, doc, updateDoc, getDoc } from "firebase/firestore"
+import { collection, query, where, onSnapshot, doc, updateDoc, getDoc, getDocs } from "firebase/firestore"
 
 
 const BookingHistory = () => {
@@ -238,34 +238,42 @@ const BookingHistory = () => {
 
   const handleReviewSubmit = async (bookingId, rating) => {
     try {
-      // 1. Update the rating in the booking
+      // 1. Update the booking with the submitted rating
       await updateBooking(bookingId, { rating })
 
-      // 2. Get booking details (to fetch stationId)
-      const bookingDoc = await getDoc(doc(db, "bookings", bookingId))
-      const stationId = bookingDoc.data()?.stationId
+      // 2. Get the booking details to retrieve the station ID
+      const bookingDocRef = doc(db, "bookings", bookingId)
+      const bookingDoc = await getDoc(bookingDocRef)
+      const bookingData = bookingDoc.data()
+      
+      const stationId = bookingData?.stationId
       if (!stationId) throw new Error("Station ID not found in booking.")
 
-      // 3. Get the station document
+      // 3. Fetch the station document
       const stationRef = doc(db, "stations", stationId)
       const stationSnap = await getDoc(stationRef)
 
       if (stationSnap.exists()) {
         const stationData = stationSnap.data()
-        const prevAvg = stationData.rating || 0
-        const totalCompleted = stationData.completedBookings || 1 // avoid divide-by-zero
 
-        // 4. Calculate new average:
-        // newAvg = ((prevAvg * (n - 1)) + newRating) / n
-        const newAvgRating = ((prevAvg * (totalCompleted - 1)) + rating) / totalCompleted
+        const previousTotal = stationData.totalRatings || 0
+        const previousCount = stationData.ratingCount || 0
 
-        // 5. Update the station's average rating
+        const newTotal = previousTotal + rating
+        const newCount = previousCount + 1
+        const newAverage = newTotal / newCount
+
+        // 4. Update the station with the new rating info
         await updateDoc(stationRef, {
-          rating: newAvgRating,
+          totalRatings: newTotal,
+          ratingCount: newCount,
+          rating: newAverage
         })
+      } else {
+        throw new Error("Station document does not exist.")
       }
 
-      // 6. Close modal + show confirmation
+      // 5. UI: Close modal and show confirmation
       setShowReviewModal(false)
       setSelectedBooking(null)
       setShowRatingConfirmation(true)
@@ -273,6 +281,7 @@ const BookingHistory = () => {
       setTimeout(() => {
         setShowRatingConfirmation(false)
       }, 4500)
+
     } catch (error) {
       console.error("Error submitting review:", error)
     }
@@ -453,7 +462,7 @@ const BookingHistory = () => {
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.05, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "3px" }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="relative hover:shadow-xl transition-all bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              className="relative hover:shadow-xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
             >
               {/* Status badge */}
               <div className={`absolute top-4 left-4 flex items-center gap-2 px-3 py-1 text-sm rounded-full border ${getStatusColor(booking.status)}`}>

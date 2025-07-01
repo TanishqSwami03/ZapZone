@@ -110,10 +110,6 @@ const CompanyRegister = () => {
         phone: formData.phone,
         password: formData.password,
         joinDate: now,
-        // lastActive: now,
-        avgRating: 0,
-        totalRevenue: 0,
-        stationCount: 0,
         status: "active",
         uid: user.uid,
         }

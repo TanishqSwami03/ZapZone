@@ -93,7 +93,7 @@ const BrowseStations = () => {
               <div className="flex items-center text-yellow-400">
                 <Star className="w-4 h-4 mr-1 fill-current" />
                 <span className="text-sm font-medium">{station.rating.toFixed(1)}</span>
-                {/* <span className="text-gray-400 text-xs ml-1">({station.reviews})</span> */}
+                <span className="text-gray-400 text-sm ml-1">( {station.ratingCount} )</span>
               </div>
             </div>
 
@@ -119,12 +119,19 @@ const BrowseStations = () => {
 
             {/* Book Button - fixed at bottom */}
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleBookStation(station)}
-              className="mt-auto ml-auto w-1/2 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300"
+              whileHover={station.vacantChargers > 0 ? { scale: 1.04 } : {}}
+              whileTap={station.vacantChargers > 0 ? { scale: 0.98 } : {}}
+              onClick={() => {
+                if (station.vacantChargers > 0) handleBookStation(station)
+              }}
+              disabled={station.vacantChargers <= 0}
+              className={`mt-auto ml-auto w-1/2 py-3 rounded-lg font-medium transition-all duration-300 ${
+                station.vacantChargers > 0
+                  ? "bg-gradient-to-r from-green-400 to-blue-500 text-white hover:shadow-lg hover:shadow-green-400/20"
+                  : "bg-gray-700 text-gray-400 cursor-not-allowed"
+              }`}
             >
-              Book Now
+              {station.vacantChargers > 0 ? "Book Now" : "Station Full"}
             </motion.button>
           </motion.div>
         ))}

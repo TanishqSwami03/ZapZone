@@ -10,6 +10,7 @@ import CompanyLogin from "./components/auth/CompanyLogin"
 import UserRegister from "./components/auth/UserRegister"
 import CompanyRegister from "./components/auth/CompanyRegister"
 import { UserProvider } from "./context/UserContext"
+import Logo from "./components/Logo"
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/logo" element={<Logo />} />
           </Routes>
         </div>
       </Router>
