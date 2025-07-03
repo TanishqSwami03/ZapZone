@@ -52,12 +52,22 @@ const AddFundsModal = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 bg-white/10 backdrop-blur-sm border border-white border-opacity-20 rounded-lg shadow-lg flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 backdrop-blur-sm border border-white border-opacity-20 rounded-lg shadow-lg flex items-center justify-center p-4 z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
+            className="backdrop-blur-lg rounded-xl p-6 w-full max-w-md border border-gray-700"
+            style={{
+              background: "#000000",
+              backgroundImage: `
+                radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+              `,
+              backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+              backgroundPosition: "0 0, 10px 10px, 15px 5px",
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -87,7 +97,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                       className={`p-3 rounded-lg border transition-all duration-200 ${
                         amount === value.toString()
                           ? "border-green-400 bg-green-400/10 text-green-400"
-                          : "border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500"
+                          : "border-gray-600 text-gray-300 hover:border-gray-500"
                       }`}
                     >
                       ₹ {value}
@@ -108,7 +118,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                     placeholder="0.00"
                     min="1"
                     step="0.01"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-400"
                   />
                 </div>
               </div>
@@ -138,7 +148,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                 disabled={isLoading || !amount || Number.parseFloat(amount) <= 0}
                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                className="w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-gradient-to-r from-800 via-green-800 to-600 text-white text-lg font-extralight rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <motion.div
@@ -153,8 +163,8 @@ const AddFundsModal = ({ isOpen, onClose }) => {
             </form>
 
             {/* Security Note */}
-            <div className="mt-4 p-3 bg-gray-700 rounded-lg">
-              <p className="text-gray-300 text-xs text-center">🔒 Your payment information is secure and encrypted</p>
+            <div className="mt-4 p-3 rounded-lg">
+              <p className="text-gray-300 text-sm text-center">🔒 Your payment information is secure and encrypted</p>
             </div>
           </motion.div>
         </div>

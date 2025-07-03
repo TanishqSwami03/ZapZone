@@ -11,12 +11,6 @@ import {
   ArrowRight,
   Menu,
   X,
-  Mail,
-  Phone,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
 } from "lucide-react"
 
 const LandingPage = () => {

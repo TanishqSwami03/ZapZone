@@ -356,7 +356,7 @@ const BookingHistory = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-green-400"
+            className="px-4 py-2 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-green-400"
           >
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -368,13 +368,13 @@ const BookingHistory = () => {
       </div>
 
       {/* Search Input */}
-      <div className="mt-2 sm:mt-4">
+      <div className="mt-2 w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
         <input
           type="text"
           placeholder="Search your bookings..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full sm:max-w-xs px-4 py-2 bg-gray-900 border border-gray-700 text-white rounded-lg placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-400 transition"
+          className="w-full sm:max-w-xs px-4 py-2 border border-gray-700 text-white rounded-lg placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-400 transition"
         />
       </div>
 
@@ -386,7 +386,7 @@ const BookingHistory = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -405,7 +405,7 @@ const BookingHistory = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -426,7 +426,7 @@ const BookingHistory = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#c27aff", borderWidth: "2px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md6"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md6"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -462,7 +462,10 @@ const BookingHistory = () => {
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.05, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "3px" }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="relative hover:shadow-xl bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              className="relative hover:shadow-xl to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              style={{
+                background: "radial-gradient(125% 125% at 100% 10%, #000000 40%, #072607 100%)",
+              }}
             >
               {/* Status badge */}
               <div className={`absolute top-4 left-4 flex items-center gap-2 px-3 py-1 text-sm rounded-full border ${getStatusColor(booking.status)}`}>

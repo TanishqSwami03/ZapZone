@@ -52,14 +52,14 @@ const BrowseStations = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative w-1/3">
+      <div className="relative w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
           placeholder="Search stations by name or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 pr-4 py-3 focus:ring-1 focus:ring-green-400 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
+          className="pl-10 pr-4 py-3 focus:ring-1 focus:ring-green-400 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
         />
       </div>
 
@@ -77,7 +77,10 @@ const BrowseStations = () => {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "1px"}}
             transition={{type: "ease-out", stiffness: 300 }}
-            className="group flex flex-col bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+            className="group flex flex-col backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+            style={{
+              background: "radial-gradient(125% 125% at 100% 10%, #000000 40%, #072607 100%)",
+            }}
           >
             {/* Station Header */}
             <div className="flex items-start justify-between mb-4">
@@ -127,7 +130,7 @@ const BrowseStations = () => {
               disabled={station.vacantChargers <= 0}
               className={`mt-auto ml-auto w-1/2 py-3 rounded-lg font-medium transition-all duration-300 ${
                 station.vacantChargers > 0
-                  ? "bg-gradient-to-r from-green-400 to-blue-500 text-white hover:shadow-lg hover:shadow-green-400/20"
+                  ? "bg-gradient-to-r from-green-600 to-gray-600 text-white hover:shadow-lg hover:shadow-green-400/20"
                   : "bg-gray-700 text-gray-400 cursor-not-allowed"
               }`}
             >

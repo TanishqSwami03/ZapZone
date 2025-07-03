@@ -65,7 +65,7 @@ const Profile = () => {
 
   if (loading || !formData) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
+      <div className="flex justify-center items-center h-screen text-white">
         Loading Profile...
       </div>
     )
@@ -76,9 +76,14 @@ const Profile = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="flex justify-center items-start pt-24 px-6 h-full bg-gray-900"
+      className="flex justify-center items-start pt-24 px-6 h-full"
     >
-      <div className="max-w-md w-full p-6 bg-gray-900 rounded-xl text-white border border-gray-700 shadow-lg">
+      <div 
+        className="max-w-md w-full p-6 rounded-xl text-white border border-gray-700 shadow-lg"
+        style={{
+          background: "radial-gradient(125% 125% at 50% 10%, #000000 40%, #072607 100%)",
+        }}
+      >
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold flex items-center">
             <User className="w-6 h-6 mr-2 text-green-400" />
@@ -90,7 +95,7 @@ const Profile = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsEditing(true)}
-              className="flex items-center px-4 py-2 bg-green-400/20 text-green-400 border border-green-400 rounded-lg hover:bg-green-400/30 transition"
+              className="flex items-center px-4 py-2 text-green-400 border border-green-400 rounded-lg hover:bg-green-400/30 transition"
             >
               <Edit2 className="w-4 h-4 mr-2" />
               Edit
@@ -145,14 +150,6 @@ const Profile = () => {
             isEditing={isEditing}
             onChange={(val) => handleChange("phone", val)}
           />
-
-          {/* <ProfileField
-            id="address"
-            label="Address"
-            value={formData.address}
-            isEditing={isEditing}
-            onChange={(val) => handleChange("address", val)}
-          /> */}
         </form>
       </div>
     </motion.div>
@@ -170,7 +167,7 @@ const ProfileField = ({ id, label, type = "text", value, isEditing, onChange }) 
       value={value}
       disabled={!isEditing}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full px-3 py-2 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
     />
   </div>
 )
