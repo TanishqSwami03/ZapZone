@@ -150,14 +150,14 @@ const ManageStations = () => {
           className="flex flex-col sm:flex-row gap-3"
         >
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <div className="flex items-center w-full sm:w-64 bg-transparent border border-gray-700 rounded-lg px-3 py-2">
+            <Search className="text-gray-400 w-4 h-4 mr-2 shrink-0" />
             <input
               type="text"
               placeholder="Search stations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 w-full sm:w-64"
+              className="bg-transparent outline-none text-white placeholder-gray-400 w-full"
             />
           </div>
 
@@ -165,18 +165,27 @@ const ManageStations = () => {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddModal(true)}
-            whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "2px", boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)" }}
+            whileHover={{
+              scale: 1.05,
+              y: -2,
+              borderColor: "#51a2ff",
+              borderWidth: "2px",
+              boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)",
+            }}
             transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
-            className="flex items-center px-4 py-2 bg-blue-400/10 text-blue-400 border border-blue-400/20 rounded-lg hover:bg-blue-400/20 transition-all duration-200"
+            className="w-fit flex items-center px-4 py-2 bg-blue-400/20 text-blue-400 border border-blue-400/20 rounded-lg hover:bg-blue-400/30 transition-all duration-200"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <span className="bg-blue-400 text-gray-900 p-1 rounded hover:bg-green-300 transition-colors mr-2">
+              <Plus className="w-4 h-4" />
+            </span>
             Add Station
           </motion.button>
         </motion.div>
+
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {/* Total Stations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -188,7 +197,7 @@ const ManageStations = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -212,7 +221,7 @@ const ManageStations = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -238,7 +247,7 @@ const ManageStations = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -254,7 +263,7 @@ const ManageStations = () => {
         </motion.div>
 
         {/* Average Rating */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           whileHover={{
@@ -264,7 +273,7 @@ const ManageStations = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -281,7 +290,7 @@ const ManageStations = () => {
               <Eye className="w-6 h-6 text-yellow-400" />
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
 
       {/* Stations Grid */}
@@ -295,7 +304,10 @@ const ManageStations = () => {
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.05, y: -2, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px" }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+              style={{
+                background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #51a2ff40 100%)",
+              }}
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-4">
@@ -322,26 +334,39 @@ const ManageStations = () => {
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4 text-center mt-2">
-                <div className="bg-gray-800 p-3 rounded-xl">
+                <div 
+                  className="border border-gray-800 p-3 rounded-xl"
+                  // style={{
+                  //   background: "radial-gradient(150% 100% at 90% 50%, rgba(81, 162, 255, 0.25), #000000 70%)"
+                  // }}
+                >
                   <p className="text-xs text-gray-400 mb-1">Total Chargers</p>
                   <p className="text-xl text-white font-semibold">{station.chargers}</p>
                 </div>
-                <div className="bg-gray-800 p-3 rounded-xl">
+                <div 
+                  className="border border-gray-800 p-3 rounded-xl"
+                >
                   <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
                   <p className="text-xl text-white font-semibold">{station.vacantChargers}</p>
                 </div>
-                <div className="bg-gray-800 p-3 rounded-xl">
+                <div 
+                  className="border border-gray-800 p-3 rounded-xl"
+                >
                   <p className="text-xs text-gray-400 mb-1">Bookings</p>
                   <p className="text-xl text-white font-semibold">{station.completedBookings}</p>
                 </div>
-                <div className="bg-gray-800 p-3 rounded-xl">
+                <div 
+                  className="border border-gray-800 p-3 rounded-xl"
+                >
                   <p className="text-xs text-gray-400 mb-1">Revenue</p>
                   <p className="text-xl text-white font-semibold">₹ {station.revenue}</p>
                 </div>
               </div>
 
               {/* Bottom */}
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-700">
+              <div 
+                className="flex justify-between items-center mt-6 pt-4 border-t border-gray-800"
+              >
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Price / min</p>
                   <p className="text-sm text-white font-medium">₹ {station.pricePerMinute}</p>

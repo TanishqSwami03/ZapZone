@@ -148,7 +148,7 @@ const AddFundsModal = ({ isOpen, onClose }) => {
                 disabled={isLoading || !amount || Number.parseFloat(amount) <= 0}
                 whileHover={{ scale: isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: isLoading ? 1 : 0.98 }}
-                className="w-full py-3 bg-gradient-to-r from-800 via-green-800 to-600 text-white text-lg font-extralight rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-gradient-to-r from-black via-green-800 to-black text-white text-lg font-extralight rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <motion.div

@@ -79,7 +79,7 @@ const Profile = () => {
       className="flex justify-center items-start pt-24 px-6 h-full"
     >
       <div 
-        className="max-w-md w-full p-6 rounded-xl text-white border border-gray-700 shadow-lg"
+        className="max-w-md w-full p-6 rounded-xl text-white border border-gray-800 shadow-lg"
         style={{
           background: "radial-gradient(125% 125% at 50% 10%, #000000 40%, #072607 100%)",
         }}
@@ -115,7 +115,7 @@ const Profile = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCancel}
-                className="flex items-center px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition"
+                className="flex items-center px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-600 transition"
               >
                 <X className="w-4 h-4 mr-2" />
                 Cancel

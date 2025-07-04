@@ -10,7 +10,9 @@ import {
   Building2,
   MapPin,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  IndianRupee,
+  Wallet
 } from "lucide-react"
 
 import {
@@ -124,6 +126,7 @@ const Earnings = () => {
 
       {/* Earnings Summary Cards (Direct motion.div) */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
         {/* Total Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -135,7 +138,7 @@ const Earnings = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -143,7 +146,7 @@ const Earnings = () => {
               <p className="text-2xl font-bold text-white mt-1">₹ {totalRevenue.toFixed(2)}</p>
             </div>
             <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-400" />
+              <IndianRupee className="w-6 h-6 text-green-400" />
             </div>
           </div>
         </motion.div>
@@ -159,7 +162,7 @@ const Earnings = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -183,7 +186,7 @@ const Earnings = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -207,7 +210,7 @@ const Earnings = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -219,6 +222,7 @@ const Earnings = () => {
             </div>
           </div>
         </motion.div>
+
       </div>
 
       {/* Station Performance Section */}
@@ -226,9 +230,9 @@ const Earnings = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ }}
-        className="bg-gray-900 border border-gray-600 rounded-xl p-6"
+        className="backdrop-blur-sm border border-gray-800 rounded-xl p-6"
       >
-        <h2 className="text-lg font-semibold text-white mb-6">Station Performance</h2>
+        <h2 className="text-2xl font-semibold text-white mb-6">Station Performance</h2>
 
         {stationStats.length === 0 ? (
           <p className="text-gray-400">No stations registered yet.</p>
@@ -241,7 +245,10 @@ const Earnings = () => {
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(station.status)}`, borderWidth: "2px"}}
                 transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+                className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+                style={{
+                  background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #51a2ff40 100%)",
+                }}
               >
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4">
@@ -261,7 +268,7 @@ const Earnings = () => {
                   <p className="text-gray-400 text-sm">Station</p>
                   <div className="flex items-center gap-1 mt-1">
                     <Building2 className="w-4 h-4 text-blue-400" />
-                    <p className="text-white font-semibold">{station.name}</p>
+                    <p className="text-white font-semibold text-lg">{station.name}</p>
                   </div>
                 </div>
 
@@ -269,28 +276,28 @@ const Earnings = () => {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
                   <div>
                     <p className="text-gray-400 mb-1">Address</p>
-                    <div className="flex items-center gap-1 text-white">
+                    <div className="flex items-center gap-1 text-white text-lg">
                       <MapPin className="w-4 h-4 text-yellow-400" />
                       <span>{station.address || "N/A"}, {station.city || "N/A"}</span>
                     </div>
                   </div>
                   <div>
                     <p className="text-gray-400 mb-1">Completed Bookings</p>
-                    <div className="flex items-center gap-1 text-white">
+                    <div className="flex items-center gap-1 text-white text-lg">
                       <Calendar className="w-4 h-4 text-blue-400" />
                       <span>{station.completedBookings}</span>
                     </div>
                   </div>
                   <div>
                     <p className="text-gray-400 mb-1">Revenue</p>
-                    <div className="flex items-center gap-1 text-green-400 font-medium">
-                      <DollarSign className="w-4 h-4" />
+                    <div className="flex items-center gap-1 text-green-400 font-medium text-lg">
+                      <Wallet className="w-4 h-4" />
                       ₹ {station.revenue.toFixed(2)}
                     </div>
                   </div>
                   <div>
                     <p className="text-gray-400 mb-1">Avg. per Booking</p>
-                    <div className="flex items-center gap-1 text-purple-400 font-medium">
+                    <div className="flex items-center gap-1 text-purple-400 font-medium text-lg">
                       <PieChart className="w-4 h-4" />
                       ₹ {station.avgPerBooking.toFixed(2)}
                     </div>

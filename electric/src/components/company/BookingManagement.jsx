@@ -168,7 +168,7 @@ const BookingManagement = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 2xl:grid-cols-4 gap-6">
 
         {/* Completed Bookings */}
         <motion.div
@@ -176,7 +176,7 @@ const BookingManagement = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#51a2ff", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -212,7 +212,7 @@ const BookingManagement = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "2px"}}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -220,7 +220,7 @@ const BookingManagement = () => {
               <p className="text-2xl font-bold text-white">₹ {totalRevenue.toFixed(2)}</p>
             </div>
             <div className="w-12 h-12 bg-green-400/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-400" />
+              <IndianRupee className="w-6 h-6 text-green-400" />
             </div>
           </div>
         </motion.div>
@@ -231,7 +231,7 @@ const BookingManagement = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#b773f0", borderWidth: "2px"}}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -249,39 +249,42 @@ const BookingManagement = () => {
         </motion.div>
       </div>
 
-      {/* Filters */}
+      {/* FILTERS */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
-        className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+        className="w-full lg:w-1/2 md:w-1/2 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 shadow-md"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+
+          {/* Filter by Status */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Status</label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white focus:outline-none focus:border-blue-400"
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-900 text-white">
                   {option.label}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* Filter by station */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Station</label>
             <select
               value={selectedStation}
               onChange={(e) => setSelectedStation(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white focus:outline-none focus:border-blue-400"
             >
               <option value="">All Stations</option>
               {stations.map((station) => (
-                <option key={station.id} value={station.id}>
+                <option key={station.id} value={station.id} className="bg-gray-900 text-white">
                   {station.name}
                 </option>
               ))}
@@ -303,7 +306,10 @@ const BookingManagement = () => {
               animate={{ opacity: 1, x: 0 }}
               whileHover={{ scale: 1.02, y: -3, borderColor: `${getBorderColor(booking.status)}`, borderWidth: "2px" }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              className="bg-gradient-to-br border border-gray-800 backdrop-blur-md rounded-2xl p-6 shadow-md"
+              style={{
+                background: "radial-gradient(125% 125% at 80% 10%, #000000 40%, #51a2ff40 100%)",
+              }}
             >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-2">
@@ -321,7 +327,7 @@ const BookingManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Station</p>
                       <div className="flex items-center">
@@ -354,7 +360,7 @@ const BookingManagement = () => {
                   </div>
 
                   {booking.status === "completed" && booking.rating && (
-                    <div className="w-fit mt-4 p-3 bg-gray-800 rounded-lg">
+                    <div className="w-fit mt-4 p-3 border border-gray-700  rounded-lg">
                       <p className="text-xs text-gray-400 mb-1">Customer Rating</p>
                       <div className="flex items-center">
                         <span className="text-yellow-400 mr-2">{"★".repeat(booking.rating)}</span>

@@ -130,9 +130,9 @@ const UserLayout = ({ children }) => {
 
         {/* Sidebar */}
         <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-          <div className="flex flex-col flex-grow border-r backdrop-blur-sm border border-gray-800 shadow-md">
+          <div className="flex flex-col flex-grow border-r backdrop-blur-sm border border-gray-900 shadow-md">
             {/* Logo */}
-            <div className="flex items-center h-16 px-6 border-b border-gray-700">
+            <div className="flex items-center h-16 px-6 border-b border-gray-900">
               <Zap className="w-8 h-8 text-green-400 mr-2" />
               <motion.span
                 style={{ fontFamily: "'Monoton', sans-serif" }}
@@ -175,12 +175,12 @@ const UserLayout = ({ children }) => {
             </nav>
 
             {/* Wallet Section */}
-            <div className="px-6 py-3 border-t border-gray-700">
+            <div className="px-6 py-3 border-t border-gray-900">
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 Wallet
               </h3>
               <div 
-                className="flex items-center space-x-4 border border-gray-700 rounded-lg px-3 py-2"
+                className="flex items-center space-x-4 border border-gray-800 rounded-lg px-3 py-2"
                 style={{
                   background: "radial-gradient(125% 125% at 100% 10%, #000000 10%, #072607 100%)",
                 }}  
@@ -197,7 +197,7 @@ const UserLayout = ({ children }) => {
             </div>
 
             {/* Logout Button */}
-            <div className="absolute bottom-4 left-4 right-4 border-t border-gray-700 pt-4">
+            <div className="absolute bottom-4 left-4 right-4 border-t border-gray-900 pt-4">
               <button
                 onClick={() => setShowLogoutModal(true)}
                 className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
@@ -217,9 +217,9 @@ const UserLayout = ({ children }) => {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.3 }}
-              className="fixed inset-y-0 left-0 z-50 w-64 border-r lg:hidden bg-gradient-to-br backdrop-blur-2xl border border-gray-700 shadow-md"
+              className="fixed inset-y-0 left-0 z-50 w-64 border-r lg:hidden bg-gradient-to-br backdrop-blur-2xl border border-gray-900 shadow-md"
             >
-              <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
+              <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
                 <div className="flex items-center">
                   <Zap className="w-8 h-8 text-green-400 mr-2" />
                   <motion.span
@@ -266,7 +266,7 @@ const UserLayout = ({ children }) => {
                 })}
               </nav>
 
-              <div className="px-6 py-3 border-t border-gray-700">
+              <div className="px-6 py-3 border-t border-gray-800">
                 <div 
                   className="flex items-center space-x-4 border border-gray-700 rounded-lg px-3 py-2"
                   style={{
@@ -286,7 +286,7 @@ const UserLayout = ({ children }) => {
                 </div>
               </div>
 
-              <div className="absolute bottom-4 left-4 right-4 border-t border-gray-700 pt-4">
+              <div className="absolute bottom-4 left-4 right-4 border-t border-gray-800 pt-4">
                 <button
                   onClick={() => setShowLogoutModal(true)}
                   className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
@@ -301,7 +301,7 @@ const UserLayout = ({ children }) => {
 
         {/* Main Content */}
         <div className="flex-1 lg:pl-64">
-          <header className="border-b h-16 flex items-center justify-between px-6 bg-gradient-to-br backdrop-blur-lg border border-gray-700 shadow-md">
+          <header className="border-b h-16 flex items-center justify-between px-6 bg-gradient-to-br backdrop-blur-lg border border-gray-900 shadow-md">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden text-gray-400 hover:text-white"
@@ -331,7 +331,7 @@ const UserLayout = ({ children }) => {
             className="fixed inset-0 z-50 backdrop-blur-lg bg-opacity-50 flex items-center justify-center"
           >
             <div 
-              className="rounded-lg p-6 w-full max-w-sm border border-gray-700"
+              className="rounded-lg p-6 w-full max-w-sm border border-gray-800"
               style={{
                 background: "#000000",
                 backgroundImage: `
@@ -343,12 +343,14 @@ const UserLayout = ({ children }) => {
                 backgroundPosition: "0 0, 10px 10px, 15px 5px",
               }}
             >
-              <h2 className="text-white text-lg font-semibold mb-4">Confirm Logout</h2>
-              <p className="text-gray-300 mb-6">Are you sure you want to logout?</p>
+              <div className="border-b border-gray-800">
+                <h2 className="text-white text-lg font-semibold mb-4">Confirm Logout</h2>
+              </div>
+              <p className="text-gray-300 my-6">Are you sure you want to logout?</p>
               <div className="flex justify-end space-x-4">
                 <button
                   onClick={() => setShowLogoutModal(false)}
-                  className="px-4 py-2 rounded bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  className="px-4 py-2 rounded bg-gray-800 text-gray-300 hover:bg-gray-600"
                 >
                   Cancel
                 </button>
@@ -362,6 +364,7 @@ const UserLayout = ({ children }) => {
             </div>
           </div>
         )}
+        
       </div>
     </div>
   )

@@ -59,7 +59,7 @@ const BrowseStations = () => {
           placeholder="Search stations by name or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 pr-4 py-3 focus:ring-1 focus:ring-green-400 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
+          className="pl-10 pr-4 py-3 focus:ring-1 focus:ring-green-400 border border-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
         />
       </div>
 
@@ -77,7 +77,7 @@ const BrowseStations = () => {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "1px"}}
             transition={{type: "ease-out", stiffness: 300 }}
-            className="group flex flex-col backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+            className="group flex flex-col backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
             style={{
               background: "radial-gradient(125% 125% at 100% 10%, #000000 40%, #072607 100%)",
             }}
