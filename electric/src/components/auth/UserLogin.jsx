@@ -217,7 +217,7 @@ const UserLogin = () => {
                 } bg-gradient-to-r from-black via-green-400 to-black text-black hover:text-white text-lg opacity-70 hover:opacity-100 py-3 rounded-lg font-semibold`
               }
             >
-              {loading ? "Registering..." : "Sign in"}
+              {loading ? "Signing in.." : "Sign in"}
             </motion.button>
           </form>
         </motion.div>

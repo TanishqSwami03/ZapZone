@@ -49,7 +49,39 @@ const AdminLayout = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen w-full relative bg-black">
+
+      {/* Radial Glow Background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(194, 122, 255, 0.25), transparent 70%),
+            radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+            radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+            radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0),
+            #000000
+          `,
+          backgroundSize: `
+            100% 100%,
+            20px 20px,
+            30px 30px,
+            25px 25px,
+            auto
+          `,
+          backgroundPosition: `
+            center,
+            0 0,
+            10px 10px,
+            15px 5px,
+            center
+          `,
+        }}
+      />
+
+      {/* Foreground Content */}
+      <div className="relative z-10 flex min-h-screen bg-transparent">
+
       {/* Mobile sidebar backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -65,9 +97,9 @@ const AdminLayout = ({ children }) => {
 
       {/* Sidebar - Hidden on mobile, visible on desktop */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-        <div className="flex flex-col flex-grow border-r bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-md border border-gray-700 shadow-md">
+        <div className="flex flex-col flex-grow border-r backdrop-blur-md border border-gray-900 shadow-md">
           {/* Logo */}
-          <div className="h-16 w-full border-b border-gray-700 flex justify-center items-center px-6">
+          <div className="h-16 w-full border-b border-gray-900 flex justify-center items-center px-6">
             <div className="flex items-center">
               <Zap className="w-8 h-8 text-purple-400 mr-2" />
               <motion.span
@@ -99,10 +131,10 @@ const AdminLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center px-4 py-3 mb-2 rounded-lg ${
                       isActive
                         ? "bg-purple-400/10 text-purple-400 border border-purple-400/20"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : "text-gray-300 hover:border hover:border-gray-700 hover:text-white"
                     }`}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
@@ -124,10 +156,10 @@ const AdminLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center px-4 py-3 mb-2 rounded-lg ${
                       isActive
                         ? "bg-purple-400/10 text-purple-400 border border-purple-400/20"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : "text-gray-300 hover:border hover:border-gray-700 hover:text-white"
                     }`}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
@@ -149,10 +181,10 @@ const AdminLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center px-4 py-3 mb-2 rounded-lg ${
                       isActive
                         ? "bg-purple-400/10 text-purple-400 border border-purple-400/20"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : "text-gray-300 hover:border hover:border-gray-700 hover:text-white"
                     }`}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
@@ -174,10 +206,10 @@ const AdminLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center px-4 py-3 mb-2 rounded-lg ${
                       isActive
                         ? "bg-purple-400/10 text-purple-400 border border-purple-400/20"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : "text-gray-300 hover:border hover:border-gray-700 hover:text-white"
                     }`}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
@@ -195,7 +227,7 @@ const AdminLayout = ({ children }) => {
           <div className="p-4 border-t border-gray-700">
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-all duration-200"
+              className="flex items-center w-full px-4 py-3 text-gray-300 hover:bg-red-800 hover:text-white rounded-lg transition-all duration-200"
             >
               <LogOut className="w-5 h-5 mr-3" />
               Logout
@@ -363,7 +395,7 @@ const AdminLayout = ({ children }) => {
       {/* Main content */}
       <div className="flex-1 lg:pl-64">
         {/* Header */}
-        <header className="border-b h-16 flex items-center justify-between px-6 bg-gradient-to-br from-gray-800 to-gray-900 backdrop-blur-lg border border-gray-700 p-6 shadow-md">
+        <header className="border-b h-16 flex items-center justify-between px-6 backdrop-blur-lg border border-gray-900 p-6 shadow-md">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-400 hover:text-white">
             <Menu className="w-6 h-6" />
           </button>
@@ -407,6 +439,8 @@ const AdminLayout = ({ children }) => {
           </div>
         </div>
       )}  
+
+      </div>
     </div>
   )
 }

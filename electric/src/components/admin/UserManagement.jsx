@@ -136,7 +136,7 @@ const UserManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -160,7 +160,7 @@ const UserManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -184,7 +184,7 @@ const UserManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -196,6 +196,7 @@ const UserManagement = () => {
             </div>
           </div>
         </motion.div>
+        
       </div>
 
       {/* Search and Filters */}
@@ -203,7 +204,7 @@ const UserManagement = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
-        className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full md:w-1/2"
+        className="backdrop-blur-sm border border-gray-800 rounded-xl p-6 w-full md:w-1/2"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
@@ -219,7 +220,7 @@ const UserManagement = () => {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+              className="w-full pl-10 pr-4 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
             />
           </motion.div>
 
@@ -232,10 +233,10 @@ const UserManagement = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 w-full bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+              className="px-3 py-2 w-full backdrop-blur-sm border border-gray-800 rounded-lg text-white focus:outline-none focus:border-purple-400"
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-900 text-white">
                   {option.label}
                 </option>
               ))}
@@ -255,15 +256,18 @@ const UserManagement = () => {
               scale: 1.05,
               y: -2,
               borderColor: getBorderColor(user.status), // Assuming you have a similar helper
-              borderWidth: "3px",
+              borderWidth: "2px",
             }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+            className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+            style={{
+              background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+            }}
           >
             {/* Header: Name + Status */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-blue-400/10 rounded-lg flex items-center justify-center mr-4">
+                <div className="w-12 h-12 bg-purple-400/10 rounded-lg flex items-center justify-center mr-4">
                   <User className="w-6 h-6 text-purple-400" />
                 </div>
                 <div>
@@ -283,11 +287,11 @@ const UserManagement = () => {
 
             {/* Info Grid 1: Phone, Join Date, Bookings */}
             <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Phone</p>
                 <p className="text-sm font-bold text-white">{user.phone}</p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Join Date</p>
                 <p className="text-sm font-bold text-white">
                   {new Date(user.joinDate).toLocaleDateString('en-US', {
@@ -297,7 +301,7 @@ const UserManagement = () => {
                   })}
                 </p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Bookings</p>
                 <p className="text-sm font-bold text-white">{user.bookings}</p>
               </div>
@@ -305,7 +309,7 @@ const UserManagement = () => {
 
             {/* Info Grid 2: Charging Hours, Total Spent */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Charging Hours</p>
                 <p className="text-sm font-bold text-white">
                   {(() => {
@@ -316,7 +320,7 @@ const UserManagement = () => {
                   })()}
                 </p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Total Spent</p>
                 <p className="text-sm font-bold text-green-400">₹ {user.expenditure}</p>
               </div>
@@ -326,10 +330,10 @@ const UserManagement = () => {
             <div className="flex gap-2">
               {user.status === "active" && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleSuspend(user)}
-                  className="flex-1 flex items-center justify-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-gradient-to-r via-red-400/40 text-white rounded-lg "
                 >
                   <Ban className="w-4 h-4 mr-1" />
                   Suspend
@@ -337,10 +341,10 @@ const UserManagement = () => {
               )}
               {user.status === "suspended" && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleActivate(user)}
-                  className="flex-1 flex items-center justify-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-gradient-to-r via-blue-400/40 text-white rounded-lg "
                 >
                   <CheckCircle className="w-4 h-4 mr-1" />
                   Activate

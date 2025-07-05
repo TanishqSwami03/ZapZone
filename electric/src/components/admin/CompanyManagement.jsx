@@ -205,7 +205,7 @@ const CompanyManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -229,7 +229,7 @@ const CompanyManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -253,7 +253,7 @@ const CompanyManagement = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 100 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="bg-gradient-to-br backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -272,11 +272,11 @@ const CompanyManagement = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300 }}
-        className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full md:w-1/2"
+        className="backdrop-blur-sm border border-gray-800 rounded-xl p-6 w-full md:w-1/2"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* Animated Search Input */}
+          {/* Search Input */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -289,11 +289,11 @@ const CompanyManagement = () => {
               placeholder="Search companies..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
+              className="w-full pl-10 pr-4 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400"
             />
           </motion.div>
 
-          {/* Animated Filter Dropdown */}
+          {/* Filter Dropdown */}
           <motion.div
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -302,10 +302,10 @@ const CompanyManagement = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400"
+              className="w-full px-3 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white focus:outline-none focus:border-purple-400"
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-900 text-white">
                   {option.label}
                 </option>
               ))}
@@ -325,10 +325,13 @@ const CompanyManagement = () => {
               scale: 1.05,
               y: -2,
               borderColor: getBorderColor(company.status),
-              borderWidth: "3px",
+              borderWidth: "2px",
             }}
             transition={{ type: "spring", stiffness: 300 }}
-            className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+            className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+            style={{
+              background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+            }}
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center">
@@ -349,15 +352,15 @@ const CompanyManagement = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Contact Person</p>
                 <p className="text-sm font-bold text-white">{company.contactPerson}</p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Phone</p>
                 <p className="text-sm font-bold text-white">{company.phone}</p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Join Date</p>
                 <p className="text-sm font-bold text-white">
                   {new Date(company.joinDate).toLocaleDateString("en-US", {
@@ -370,15 +373,15 @@ const CompanyManagement = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Avg. Rating</p>
                 <p className="text-sm font-bold text-white">{company.avgRating}</p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Stations</p>
                 <p className="text-sm font-bold text-white">{company.stationCount}</p>
               </div>
-              <div className="text-center p-3 bg-gray-800 rounded-lg">
+              <div className="text-center p-3 border border-gray-800 rounded-lg">
                 <p className="text-xs text-gray-400 mb-1">Total Revenue</p>
                 <p className="text-sm font-bold text-green-400">₹ {company.totalRevenue}</p>
               </div>
@@ -387,10 +390,10 @@ const CompanyManagement = () => {
             <div className="flex gap-2">
               {company.status === "active" && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleSuspend(company)}
-                  className="flex-1 flex items-center justify-center px-3 py-2 bg-red-400/10 text-red-400 border border-red-400/20 rounded-lg hover:bg-red-400/20 transition-all duration-200"
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-gradient-to-r via-red-400/40 text-white rounded-lg "
                 >
                   <Ban className="w-4 h-4 mr-1" />
                   Suspend
@@ -398,10 +401,10 @@ const CompanyManagement = () => {
               )}
               {company.status === "suspended" && (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleActivate(company)}
-                  className="flex-1 flex items-center justify-center px-3 py-2 bg-green-400/10 text-green-400 border border-green-400/20 rounded-lg hover:bg-green-400/20 transition-all duration-200"
+                  className="flex-1 flex items-center justify-center px-3 py-2 bg-gradient-to-r via-blue-400/40 text-white rounded-lg "
                 >
                   <CheckCircle className="w-4 h-4 mr-1" />
                   Activate

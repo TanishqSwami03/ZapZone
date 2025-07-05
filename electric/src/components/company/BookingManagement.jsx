@@ -282,7 +282,7 @@ const BookingManagement = () => {
               onChange={(e) => setSelectedStation(e.target.value)}
               className="w-full px-3 py-2 backdrop-blur-sm border border-gray-800 rounded-lg text-white focus:outline-none focus:border-blue-400"
             >
-              <option value="">All Stations</option>
+              <option value="" className="bg-gray-900 text-white">All Stations</option>
               {stations.map((station) => (
                 <option key={station.id} value={station.id} className="bg-gray-900 text-white">
                   {station.name}

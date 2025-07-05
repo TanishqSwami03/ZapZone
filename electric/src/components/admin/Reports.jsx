@@ -102,7 +102,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#05df72", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -121,7 +121,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#3B82F6", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -140,7 +140,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#A855F7", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -159,7 +159,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#FACC15", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -178,7 +178,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#FB923C", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -197,7 +197,7 @@ const Reports = () => {
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05, y: -2, borderColor: "#EC4899", borderWidth: "3px" }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-sm border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -222,18 +222,21 @@ const Reports = () => {
           borderWidth: "1.5px"
         }}
         transition={{ type: "spring", stiffness: 300 }}
-        className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+        className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+        style={{
+          background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+        }}
       >
         <h2 className="text-xl font-semibold text-white mb-6">🏆 Top Performing Stations</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-3 sm:grid-cols-2 gap-4">
           {topStations.map((station, index) => (
             <motion.div
               key={station.name}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.08 }}
-              className="flex items-center justify-between p-5 bg-gray-900/50 border border-gray-700 rounded-xl hover:shadow-xl hover:border-purple-400/30 transition duration-200"
+              className="flex items-center justify-between p-5 backdrop-blur-sm border border-gray-700 rounded-xl hover:shadow-xl hover:border-purple-400/30 transition duration-200"
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 border border-purple-400/20 flex items-center justify-center font-bold">
@@ -242,10 +245,20 @@ const Reports = () => {
                 <div>
                   <h3 className="text-white font-medium text-sm">{station.name}</h3>
                   <div className="flex gap-2 mt-1">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-300">
+                    <span 
+                      className="text-xs px-2 py-0.5 rounded-full backdrop-blur-sm border border-gray-800 text-gray-300"
+                      style={{
+                        background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+                      }}
+                    >
                       📦 {station.bookings} bookings
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-yellow-300">
+                    <span 
+                      className="text-xs px-2 py-0.5 rounded-full backdrop-blur-sm border border-gray-800 text-yellow-300"
+                      style={{
+                        background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+                      }}
+                    >
                       ⭐ {station.rating}
                     </span>
                   </div>

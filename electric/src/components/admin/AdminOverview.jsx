@@ -117,7 +117,7 @@ const AdminOverview = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -141,7 +141,7 @@ const AdminOverview = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -165,7 +165,7 @@ const AdminOverview = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -189,7 +189,7 @@ const AdminOverview = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -210,7 +210,10 @@ const AdminOverview = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
+          style={{
+            background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+          }}
         >
           <h3 className="text-lg font-semibold text-white mb-6">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-4">
@@ -225,7 +228,7 @@ const AdminOverview = () => {
                 whileHover={{ scale: 1.05 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => navigate(action.path)}
-                className={`flex flex-col items-center justify-center p-6 rounded-xl border border-gray-700 bg-gray-900 hover:bg-gray-800 transition-all`}
+                className={`flex flex-col items-center justify-center p-6 rounded-2xl border border-gray-800 hover:border hover:border-purple-400`}
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${
                   action.color === "blue" ? "bg-blue-400/10" :
@@ -242,7 +245,7 @@ const AdminOverview = () => {
                     }`}
                   />
                 </div>
-                <span className="text-sm text-white text-center font-medium">{action.title}</span>
+                <span className="text-md text-white text-center font-medium">{action.title}</span>
               </motion.button>
             ))}
           </div>
@@ -252,7 +255,10 @@ const AdminOverview = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-800 rounded-2xl p-6 shadow-md"
+          style={{
+            background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+          }}
         >
           <h3 className="text-lg font-semibold text-white mb-6">Recent Activity</h3>
           <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
@@ -265,9 +271,10 @@ const AdminOverview = () => {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg hover:border hover:border-purple-400"
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  {/* Icon */}
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
                     activity.color === "blue" ? "bg-blue-400/10" :
                     activity.color === "green" ? "bg-green-400/10" :
                     activity.color === "purple" ? "bg-purple-400/10" :
@@ -282,11 +289,16 @@ const AdminOverview = () => {
                       }`}
                     />
                   </div>
+
+                  {/* Message + Spacer */}
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">{activity.message}</p>
-                    <p className="text-gray-400 text-xs">{activity.time}</p>
                   </div>
+
+                  {/* Time on the right */}
+                  <p className="text-gray-400 text-xs whitespace-nowrap ml-4">{activity.time}</p>
                 </motion.div>
+
               ))
             )}
           </div>

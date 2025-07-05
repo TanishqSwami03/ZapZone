@@ -1,8 +1,8 @@
-import { AlertCircle, CheckCircle2, Info, AlertTriangle } from "lucide-react"
+import { AlertCircle, CheckCircle2, Info, AlertTriangle, X } from "lucide-react"
 
 const ConfirmModal = ({
   isOpen,
-  // onClose,
+  onClose,         // ✅ ensure this is defined
   onConfirm,
   title,
   message,
@@ -27,11 +27,9 @@ const ConfirmModal = ({
   }
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4"
-    >
-      <div 
-        className="rounded-xl p-6 max-w-sm w-full border border-gray-700"
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4">
+      <div
+        className="rounded-xl p-6 max-w-sm w-full border border-gray-700 relative"
         style={{
           background: "#000000",
           backgroundImage: `
@@ -43,11 +41,24 @@ const ConfirmModal = ({
           backgroundPosition: "0 0, 10px 10px, 15px 5px",
         }}
       >
-        <div className="flex items-center mb-4 space-x-3">
-          {getIcon()}
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+
+        {/* Icon and Title */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            {getIcon()}
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
+
         <p className="text-gray-300 mb-6 text-md">{message}</p>
+
         <div className="flex justify-end gap-3">
           <button
             onClick={onConfirm}

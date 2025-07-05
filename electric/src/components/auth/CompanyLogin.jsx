@@ -188,7 +188,7 @@ const CompanyLogin = () => {
 
               }
             >
-              {loading ? "Registering..." : "Sign in"}
+              {loading ? "Signing in.." : "Sign in"}
             </motion.button>
           </form>
         </motion.div>

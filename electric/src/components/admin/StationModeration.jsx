@@ -187,9 +187,7 @@ const StationModeration = () => {
     }
   }
 
-  const pendingCount = stations.filter((s) => s.status === "pending").length
   const activeCount = stations.filter((s) => s.status === "active").length
-  const rejectedCount = stations.filter((s) => s.status === "rejected").length
   const suspendedCount = stations.filter((s) => s.status === "suspended").length
 
   return (
@@ -217,10 +215,10 @@ const StationModeration = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Search stations or companies..."
+              placeholder="Search here..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
+              className="pl-10 pr-4 py-2 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 w-full"
             />
           </motion.div>
 
@@ -233,10 +231,10 @@ const StationModeration = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-400"
+              className="px-4 py-2 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-400"
             >
               {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-900 text-white">
                   {option.label}
                 </option>
               ))}
@@ -260,7 +258,7 @@ const StationModeration = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -273,24 +271,6 @@ const StationModeration = () => {
           </div>
         </motion.div>
 
-        {/* Pending */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Pending</p>
-              <p className="text-2xl font-bold text-white">{pendingCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-400/10 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-        </motion.div> */}
-
         {/* Active */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -302,7 +282,7 @@ const StationModeration = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -326,7 +306,7 @@ const StationModeration = () => {
             borderWidth: "3px",
           }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+          className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -339,23 +319,6 @@ const StationModeration = () => {
           </div>
         </motion.div>
 
-        {/* Rejected */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gray-800 border border-gray-700 rounded-xl p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Rejected</p>
-              <p className="text-2xl font-bold text-white">{rejectedCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-red-400/10 rounded-lg flex items-center justify-center">
-              <XCircle className="w-6 h-6 text-red-400" />
-            </div>
-          </div>
-        </motion.div> */}
       </div>
 
       {/* Stations Grid */}
@@ -371,10 +334,13 @@ const StationModeration = () => {
                 scale: 1.05,
                 y: -2,
                 borderColor: `${getBorderColor(station.status)}`,
-                borderWidth: "3px",
+                borderWidth: "2px",
               }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-md border border-gray-700 rounded-2xl p-6 shadow-md"
+              className="backdrop-blur-md border border-gray-900 rounded-2xl p-6 shadow-md"
+              style={{
+                background: "radial-gradient(125% 125% at 75% 10%, #000000 40%, #c27aff40 100%)",
+              }}
             >
               {/* Name, address, companyName, status */}
               <div className="flex items-start justify-between mb-4">
@@ -404,17 +370,17 @@ const StationModeration = () => {
 
               {/* Chargers, Vacant Chargers, Completed Bookings */}
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <div className="text-center p-3 border border-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Chargers</p>
                   <p className="text-sm font-bold text-white">
                     {station.chargers} 
                   </p>
                 </div>
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <div className="text-center p-3 border border-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Vacant Chargers</p>
                   <p className="text-sm font-bold text-white">{station.vacantChargers}</p>
                 </div>
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <div className="text-center p-3 border border-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Completed Bookings</p>
                   <p className="text-sm font-bold text-white">{station.completedBookings}</p>
                 </div>
@@ -422,13 +388,13 @@ const StationModeration = () => {
 
               {/* Revenue, Rating */}
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <div className="text-center p-3 border border-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Revenue</p>
                   <p className="text-sm font-bold text-green-400">
                     ₹ {station.revenue} 
                   </p>
                 </div>
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
+                <div className="text-center p-3 border border-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400 mb-1">Rating</p>
                   <p className="text-sm font-bold text-white">{station.rating.toFixed(1)} ⭐</p>
                 </div>
@@ -504,7 +470,7 @@ const StationModeration = () => {
         onClose={() => setShowApproveModal(false)}
         onConfirm={confirmApprove}
         title="Approve Station"
-        message={`Are you sure you want to approve "${selectedStation?.name}"? This will make it available for public use.`}
+        message={`Are you sure you want to approve "${selectedStation?.name}"? `}
         confirmText="Approve"
         confirmColor="green"
       />
@@ -514,7 +480,7 @@ const StationModeration = () => {
         onClose={() => setShowRejectModal(false)}
         onConfirm={confirmReject}
         title="Reject Station"
-        message={`Are you sure you want to reject "${selectedStation?.name}"? The company will be notified of this decision.`}
+        message={`Are you sure you want to reject "${selectedStation?.name}"? `}
         confirmText="Reject"
         confirmColor="red"
       />
@@ -524,7 +490,7 @@ const StationModeration = () => {
         onClose={() => setShowSuspendModal(false)}
         onConfirm={confirmSuspend}
         title="Suspend Station"
-        message={`Are you sure you want to suspend "${selectedStation?.name}"? This will temporarily disable the station.`}
+        message={`Are you sure you want to suspend "${selectedStation?.name}"? `}
         confirmText="Suspend"
         confirmColor="orange"
       />
@@ -534,7 +500,7 @@ const StationModeration = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
         title="Delete Station"
-        message={`Are you sure you want to permanently delete "${selectedStation?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to permanently delete "${selectedStation?.name}"? `}
         confirmText="Delete"
         confirmColor="red"
       />
