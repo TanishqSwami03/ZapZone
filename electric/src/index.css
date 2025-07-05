@@ -157,3 +157,34 @@ button:disabled {
     display: none !important;
   }
 }
+
+
+
+
+/* USED IN LOGIN TYPE SELECTOR */
+.hover-radial-bg-blue:hover {
+  background: radial-gradient(100% 150% at 125% 10%, #000000 40%, #51a2ff5e 100%);
+}
+.hover-radial-bg-green:hover {
+  background: radial-gradient(100% 150% at 125% 10%, #000000 40%, #072607 100%);
+}
+/*  */
+
+
+.glow-effect-login {
+  /* box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80, 0 0 25px #4ade80; */
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-effect-login:hover {
+  box-shadow: 0 0 12px #4ade80, 0 0 40px #4ade80, 0 0 35px #4ade80;
+}
+
+.glow-effect-getStarted {
+  /* box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80, 0 0 25px #4ade80; */
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-effect-getStarted:hover {
+  box-shadow: 0 0 12px #3d7dff, 0 0 40px #3d7dff, 0 0 35px #3d7dff;
+}
