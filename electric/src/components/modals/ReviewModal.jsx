@@ -19,7 +19,6 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
   const handleClose = () => {
     setRating(0)
     setHoveredRating(0)
-    setSubmitted(false)
     onClose()
   }
 
@@ -33,7 +32,17 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
+            className="rounded-xl p-6 w-full max-w-md border border-gray-700"
+            style={{
+              background: "#000000",
+              backgroundImage: `
+                radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+              `,
+              backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+              backgroundPosition: "0 0, 10px 10px, 15px 5px",
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -47,7 +56,7 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
             </div>
 
             {/* Booking Details */}
-            <div className="bg-gray-700 rounded-lg p-4 mb-6">
+            <div className="backdrop-blur-sm border border-gray-700 rounded-lg p-4 mb-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-400">Date</p>
@@ -117,18 +126,19 @@ const ReviewModal = ({ isOpen, onClose, booking, onSubmit }) => {
 
             {/* Action Buttons */}
             <div className="flex space-x-3">
-              <button
+              <motion.button
+                whileHover={{scale:1.08}}
                 onClick={handleClose}
-                className="flex-1 px-4 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-black via-gray-400 to-black text-white opacity-70 hover:opacity-100 rounded-lg transition-colors"
               >
                 Cancel
-              </button>
+              </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={rating === 0}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-black via-green-400 to-black text-white font-medium rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Submit Rating
               </motion.button>

@@ -525,8 +525,8 @@ const BookingHistory = () => {
                       transition={{ duration: 0.5 }}
                     />
                   </div>
-                  <div className="text-xs text-gray-500 mt-1 text-right">
-                    {Math.round(calculateProgress(booking.id, booking.duration))}% complete
+                  <div className="text-sm text-gray-100 mt-1 text-right">
+                    {Math.round(calculateProgress(booking.id, booking.duration))} % complete
                   </div>
                 </div>
               )}
@@ -556,7 +556,7 @@ const BookingHistory = () => {
                       ease: "easeInOut",
                     }}
                     onClick={() => handleLeaveReview(booking)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r via-green-400/40 text-white rounded-lg "
+                    className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r via-green-400/40 text-white rounded-lg transition"
                   >
                     <Stars className="w-4 h-4 mr-2" />
                     Leave Rating
