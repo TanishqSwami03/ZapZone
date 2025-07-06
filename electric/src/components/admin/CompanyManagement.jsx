@@ -18,6 +18,7 @@ const CompanyManagement = () => {
   const [showActionsModal, setShowActionsModal] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(null)
 
+  const [rawCompanies, setRawCompanies] = useState([])
   const [companies, setCompanies] = useState([])
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const CompanyManagement = () => {
         id: doc.id,
         ...doc.data(),
       }))
-      setCompanies(companyData)
+      setRawCompanies(companyData)
     })
     return () => unsub()
   }, [])
@@ -40,10 +41,8 @@ const CompanyManagement = () => {
           ...doc.data()
         }))
 
-        // Create a company stats map
         const statsMap = {}
-
-        for (const company of companies) {
+        for (const company of rawCompanies) {
           const companyStations = allStations.filter(
             (station) => station.companyId === company.id
           )
@@ -66,8 +65,7 @@ const CompanyManagement = () => {
           }
         }
 
-        // Merge back into companies state
-        const enrichedCompanies = companies.map(company => ({
+        const enrichedCompanies = rawCompanies.map(company => ({
           ...company,
           ...statsMap[company.id],
         }))
@@ -78,10 +76,10 @@ const CompanyManagement = () => {
       }
     }
 
-    if (companies.length > 0) {
+    if (rawCompanies.length > 0) {
       fetchAdditionalStats()
     }
-  }, [companies])
+  }, [rawCompanies])
 
   const statusOptions = [
     { value: "", label: "All Statuses" },
