@@ -141,7 +141,17 @@ const BookingModal = ({ isOpen, onClose, station }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700"
+            className="rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700"
+            style={{
+              background: "#000000",
+              backgroundImage: `
+                radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+              `,
+              backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+              backgroundPosition: "0 0, 10px 10px, 15px 5px",
+            }}
           >
             <AnimatePresence>
               {showInsufficientFunds && (
@@ -183,7 +193,7 @@ const BookingModal = ({ isOpen, onClose, station }) => {
                 </div>
 
                 {/* Station Info */}
-                <div className="bg-gray-700 rounded-lg p-4 mb-6">
+                <div className="backdrop-blur-sm border border-gray-800 rounded-lg p-4 mb-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-gray-400 text-sm">Address</p>
@@ -218,10 +228,10 @@ const BookingModal = ({ isOpen, onClose, station }) => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setDuration(mins)}
-                        className={`p-2 rounded text-sm transition-all duration-200 ${
+                        className={`p-2 rounded text-sm ${
                           duration === mins
-                            ? "bg-blue-400 text-gray-900 font-medium"
-                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                            ? "bg-green-400 text-gray-900 font-medium"
+                            : "backdrop-blur-sm border border-gray-800 text-gray-300 "
                         }`}
                       >
                         {mins}m
@@ -234,7 +244,7 @@ const BookingModal = ({ isOpen, onClose, station }) => {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-700 rounded-lg p-4 mb-6"
+                  className="backdrop-blur-sm border border-gray-800 rounded-lg p-4 mb-6"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -254,17 +264,18 @@ const BookingModal = ({ isOpen, onClose, station }) => {
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3">
-                  <button
+                  <motion.button
+                    whileHover={{scale:1.05}}
                     onClick={handleClose}
-                    className="flex-1 px-4 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-black via-gray-600 to-black text-white rounded-lg "
                   >
                     Cancel
-                  </button>
+                  </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleBooking}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-green-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-black via-green-600 to-black text-white font-medium rounded-lg "
                   >
                     Confirm Booking
                   </motion.button>
@@ -281,14 +292,24 @@ const BookingModal = ({ isOpen, onClose, station }) => {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="w-20 h-20 bg-green-400/10 rounded-full flex items-center justify-center mx-auto mb-6"
+                  className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                  style={{
+                    background: "#000000",
+                    backgroundImage: `
+                      radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                      radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                      radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+                    `,
+                    backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+                    backgroundPosition: "0 0, 10px 10px, 15px 5px",
+                  }}
                 >
                   <CheckCircle className="w-10 h-10 text-green-400" />
                 </motion.div>
                 <h3 className="text-2xl font-bold text-white mb-2">Booking Confirmed!</h3>
                 <p className="text-gray-400 mb-4">Your charging session has been successfully booked.</p>
                 <p className="text-gray-400 mb-4">Start charging your vehicle from the Bookings page.</p>
-                <div className="bg-gray-700 rounded-lg p-4 text-left">
+                <div className="backdrop-blur-sm border border-gray-800 rounded-lg p-4 text-left">
                   <p className="text-white font-medium">{station.name}</p>
                   <p className="text-gray-400 text-sm">
                     {duration} minutes

@@ -359,7 +359,7 @@ const BookingHistory = () => {
             className="px-4 py-2 border border-gray-800 rounded-lg text-white focus:outline-none focus:border-green-400"
           >
             {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="bg-gray-900 text-white">
                 {option.label}
               </option>
             ))}
@@ -507,7 +507,7 @@ const BookingHistory = () => {
               {isCharging && timeRemaining > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center text-yellow-400 font-medium">
+                    <div className="flex items-center text-yellow-400 font-medium gap-2">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -534,13 +534,14 @@ const BookingHistory = () => {
               {/* Action buttons */}
               <div className="mt-6 flex flex-col gap-2">
                 {booking.status === "confirmed" && (
-                  <button
+                  <motion.button
+                    whileHover={{scale:1.05}}
                     onClick={() => handleStartCharging(booking)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/20 transition"
+                    className="glow-effect-startCharging w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r via-yellow-400/40 text-white rounded-lg "
                   >
                     <Play className="w-4 h-4 mr-2" />
                     Start Charging
-                  </button>
+                  </motion.button>
                 )}
 
                 {booking.status === "completed" && !booking.rating && (
@@ -555,7 +556,7 @@ const BookingHistory = () => {
                       ease: "easeInOut",
                     }}
                     onClick={() => handleLeaveReview(booking)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/20 transition"
+                    className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r via-green-400/40 text-white rounded-lg "
                   >
                     <Stars className="w-4 h-4 mr-2" />
                     Leave Rating
@@ -563,13 +564,14 @@ const BookingHistory = () => {
                 )}
 
                 {booking.status === "confirmed" && (
-                  <button
+                  <motion.button
+                    whileHover={{scale:1.05}}
                     onClick={() => handleCancelBooking(booking)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition"
+                    className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r via-red-400/40 text-white rounded-lg "
                   >
                     <X className="w-4 h-4 mr-2" />
                     Cancel Booking
-                  </button>
+                  </motion.button>
                 )}
               </div>
             </motion.div>

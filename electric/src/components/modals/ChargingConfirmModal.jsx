@@ -12,14 +12,24 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm "
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
+            className="rounded-xl p-6 w-full max-w-md border border-gray-700"
+            style={{
+              background: "#000000",
+              backgroundImage: `
+                radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+              `,
+              backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+              backgroundPosition: "0 0, 10px 10px, 15px 5px",
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -37,7 +47,7 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
 
               <h3 className="text-lg font-semibold text-white mb-3">Ready to Start Charging?</h3>
 
-              <div className="bg-gray-700 rounded-lg p-4 mb-4">
+              <div className="backdrop-blur-sm border border-gray-800 rounded-lg p-4 mb-4">
                 <p className="text-white font-medium mb-2">{booking?.stationName}</p>
                 <p className="text-gray-400 text-sm">
                   {booking?.chargerType} • {booking?.date} at {booking?.time}
@@ -51,7 +61,7 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
             </div>
 
             {/* Confirmation */}
-            <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-4 mb-6">
+            <div className="bg-yellow-400/20 border border-yellow-400/20 rounded-lg p-4 mb-6">
               <div className="flex items-start">
                 <Zap className="w-5 h-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
                 <p className="text-yellow-400 font-medium">Are you at the charger and connected with your vehicle?</p>
@@ -60,18 +70,20 @@ const ChargingConfirmModal = ({ isOpen, onClose, onConfirm, booking }) => {
 
             {/* Buttons */}
             <div className="flex space-x-3">
-              <button
+              <motion.button
+                whileHover={{scale:1.05}}
                 onClick={onClose}
-                className="flex-1 px-4 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                className="flex-1 px-4 py-3 bg-gradient-to-r via-gray-400/40 text-white rounded-lg "
               >
                 Not Yet
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{scale:1.05}}
                 onClick={onConfirm}
-                className="flex-1 px-4 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-300 transition-colors font-medium"
+                className="flex-1 px-4 py-3 bg-gradient-to-r via-yellow-400/40 text-white rounded-lg font-medium"
               >
                 Yes, Start Charging
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

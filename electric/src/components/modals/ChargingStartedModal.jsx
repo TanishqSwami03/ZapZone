@@ -12,7 +12,17 @@ const ChargingStartedModal = ({ isOpen, onClose, booking }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700"
+            className="rounded-xl p-6 w-full max-w-md border border-gray-700"
+            style={{
+              background: "#000000",
+              backgroundImage: `
+                radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+              `,
+              backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+              backgroundPosition: "0 0, 10px 10px, 15px 5px",
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -46,7 +56,7 @@ const ChargingStartedModal = ({ isOpen, onClose, booking }) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="bg-gray-700 rounded-lg p-4 mb-4"
+                className="backdrop-blur-sm border border-gray-700 rounded-lg p-4 mb-4"
               >
                 <p className="text-white font-medium mb-1">{booking?.stationName}</p>
                 <p className="text-gray-400 text-sm">{booking?.chargerType}</p>
@@ -66,7 +76,7 @@ const ChargingStartedModal = ({ isOpen, onClose, booking }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1 }}
                 onClick={onClose}
-                className="w-full px-4 py-3 bg-green-400 text-gray-900 rounded-lg hover:bg-green-300 transition-colors font-medium"
+                className="w-full px-4 py-3 bg-gradient-to-r via-green-400/40 text-white rounded-lg font-medium"
               >
                 Continue
               </motion.button>

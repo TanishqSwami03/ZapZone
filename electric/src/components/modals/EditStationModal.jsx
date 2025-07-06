@@ -61,10 +61,20 @@ const EditStationModal = ({ isOpen, onClose, station, onUpdate }) => {
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="bg-gray-900 text-white rounded-xl shadow-lg p-6 w-full max-w-xl border border-gray-700"
+          className="text-white rounded-xl shadow-lg p-6 w-full max-w-xl border border-gray-700"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
+          style={{
+            background: "#000000",
+            backgroundImage: `
+              radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.2) 1px, transparent 0),
+              radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.18) 1px, transparent 0),
+              radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.15) 1px, transparent 0)
+            `,
+            backgroundSize: "20px 20px, 30px 30px, 25px 25px",
+            backgroundPosition: "0 0, 10px 10px, 15px 5px",
+          }}
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Edit Station</h2>
@@ -84,14 +94,14 @@ const EditStationModal = ({ isOpen, onClose, station, onUpdate }) => {
           <div className="flex justify-end mt-6 gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 text-sm rounded-md hover:bg-gray-600"
+              className="w-1/3 px-4 py-2 bg-gradient-to-r from-black via-gray-400 to-black text-sm rounded-md "
             >
               Cancel
             </button>
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-sm text-white rounded-md hover:bg-blue-500"
+              className="w-1/3 px-4 py-2 bg-gradient-to-r from-black via-blue-400 to-black text-sm text-white rounded-md "
             >
               Update Station
             </motion.button>
@@ -110,7 +120,7 @@ const Input = ({ label, name, type = "text", value, onChange }) => (
       name={name}
       value={value}
       onChange={onChange}
-      className="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-600 text-white focus:outline-none"
+      className="w-full px-3 py-2 rounded-md backdrop-blur-sm border border-gray-800 text-white focus:outline-none"
     />
   </div>
 )
